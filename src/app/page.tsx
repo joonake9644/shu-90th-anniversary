@@ -1,65 +1,107 @@
-import Image from "next/image";
+/*
+ * ==================================================================================
+ * ⚠️ 경고: 이 파일의 구조를 절대 임의로 변경하지 마세요!
+ * ==================================================================================
+ *
+ * 이 파일은 원본 Figma 디자인을 기반으로 한 메인 페이지의 핵심 구조입니다.
+ *
+ * 🚫 금지 사항:
+ * - 컴포넌트의 순서 변경
+ * - 컴포넌트 제거 또는 대체
+ * - HistoryStory를 별도의 섹션으로 분리
+ * - PeriodSection들을 다른 컴포넌트로 교체
+ * - 전체 구조를 임의로 재구성
+ *
+ * ✅ 허용 사항:
+ * - 개별 컴포넌트 내부의 스타일 수정
+ * - props 추가 및 전달
+ * - 애니메이션 파라미터 조정
+ *
+ * 📋 원본 구조 (반드시 유지):
+ * 1. HeroSection - 90 YEARS OF HISTORY
+ * 2. TimelineIntro - 1936 강조
+ * 3. HistoryStory - 90년 스토리텔링 (4개 Act 통합)
+ * 4. MarqueeSection - TRUTH · LOVE · SERVICE
+ * 5. PeriodSection × 6 - 6개 시대 섹션
+ * 6. Footer
+ * 7. TimelineNavigation (sticky)
+ *
+ * 변경이 필요한 경우 반드시 사용자에게 확인 후 진행하세요.
+ * 원본 참조: 90_year_figma/src/components/pages/HomePage.tsx
+ *
+ * 자세한 내용은 프로젝트 루트의 RULES.md 파일을 참조하세요.
+ * ==================================================================================
+ */
+
+'use client';
+
+import React from 'react';
+import { HeroSection } from '@/components/sections/HeroSection';
+import { TimelineIntro } from '@/components/sections/TimelineIntro';
+import HistoryStory from '@/components/sections/HistoryStory';
+import { MarqueeSection } from '@/components/sections/MarqueeSection';
+import { PeriodSection } from '@/components/sections/PeriodSection';
+import { Footer } from '@/components/layout/Footer';
+import { TimelineNavigation } from '@/components/navigation/TimelineNavigation';
+import { timelineData } from '@/data/timelineData';
 
 export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    const [activePeriod, setActivePeriod] = React.useState<string | null>(null);
+
+    const handleInView = (id: string) => {
+        setActivePeriod(id);
+    };
+
+    return (
+        <main className="bg-black min-h-screen text-white overflow-x-hidden">
+            {/* 1. Hero Section - 90 YEARS OF HISTORY */}
+            <HeroSection />
+
+            {/* 2. Timeline Intro - 1936 강조 및 역사 전개 */}
+            <TimelineIntro />
+
+            {/* 3. History Story - 90년 역사 스토리텔링 (4개 Act 포함) */}
+            <HistoryStory />
+
+            {/* 4. Moving Text Divider */}
+            <MarqueeSection
+                text="TRUTH · LOVE · SERVICE · 90TH ANNIVERSARY · "
+                direction="left"
+                speed={1.2}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+
+            {/* 5. Timeline Sections - 6개 시대 */}
+            <div className="relative">
+                {timelineData.map((period, index) => (
+                    <React.Fragment key={period.id}>
+                        <PeriodSection
+                            period={period}
+                            onInView={handleInView}
+                        />
+                        {/* Add Marquee between sections occasionally */}
+                        {index === 1 && (
+                            <MarqueeSection
+                                text="GLOBAL SHU · HEALTH EXPERTS · "
+                                direction="right"
+                                speed={2.5}
+                            />
+                        )}
+                        {index === 3 && (
+                            <MarqueeSection
+                                text="VISION 2030 · INNOVATION · "
+                                direction="left"
+                                speed={2}
+                            />
+                        )}
+                    </React.Fragment>
+                ))}
+            </div>
+
+            {/* 6. Footer */}
+            <Footer />
+
+            {/* Sticky Timeline Navigation */}
+            <TimelineNavigation activeEra={activePeriod ? timelineData.findIndex(p => p.id === activePeriod) : 0} />
+        </main>
+    );
 }

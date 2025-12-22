@@ -1,259 +1,46 @@
-# 90주년 기념 히스토리 섹션 | Antigravity 통합 패키지
+# 삼육보건대학교 90주년 기념 홈페이지
 
-> **Figma Make**에서 생성된 90주년 히스토리 섹션을  
-> **Antigravity (Next.js + Firebase + Vercel)** 프로젝트로 이관하기 위한 완전한 패키지
+## ⚠️ 중요: AI 개발 규칙
 
----
+**이 프로젝트에서 AI가 메인 페이지(`src/app/page.tsx`)를 통으로 교체하거나 전체 구조를 변경하는 것은 절대 금지됩니다.**
 
-## 📌 **프로젝트 정보**
+### AI가 할 수 있는 것 ✅
 
-- **원본 디자인**: [Figma 파일](https://www.figma.com/design/mrIwkKkNrheXzERWdCZ0gL/100%EC%A3%BC%EB%85%84-%EA%B8%B0%EB%85%90-%ED%99%88%ED%8E%98%EC%9D%B4%EC%A7%80-%EC%A0%9C%EC%9E%91)
-- **생성 도구**: Figma Make (Vite + React)
-- **타겟 환경**: Antigravity (Next.js + Firebase + Vercel)
-- **최적화 버전**: v2.0.0-nextjs
+- 개별 컴포넌트 내부의 디자인 수정
+- 스타일링 및 CSS 조정
+- 애니메이션 파라미터 변경
+- 텍스트 및 이미지 콘텐츠 수정
+- 새로운 props 추가 및 전달
+- 버그 수정 및 성능 최적화
 
----
+### AI가 할 수 없는 것 ❌
 
-## 🚀 **빠른 시작 (30분)**
+- `src/app/page.tsx` 파일을 통으로 교체
+- 컴포넌트의 순서 변경
+- 주요 섹션 컴포넌트 제거 또는 대체
+- HistoryStory를 별도의 섹션으로 분리
+- PeriodSection들을 다른 컴포넌트로 교체
+- 전체 페이지 구조를 재구성
 
-### Step 1: 패키지 설치
-```bash
-cd antigravity
-npm install framer-motion
-npm install @studio-freight/lenis  # 선택, 권장
-```
+**변경이 필요한 경우 반드시 사용자에게 확인 후 진행해야 합니다.**
 
-### Step 2: 핵심 파일 복사
-```bash
-# HistoryStory_NEXTJS.tsx 내용을 복사하여
-# antigravity/components/sections/HistoryStory.tsx 생성
-```
-
-### Step 3: 페이지 통합
-```typescript
-// app/(routes)/history/page.tsx
-import HistoryStory from '@/components/sections/HistoryStory';
-
-export default function HistoryPage() {
-  return <HistoryStory />;
-}
-```
-
-### Step 4: 실행 및 테스트
-```bash
-npm run dev
-# http://localhost:3000/history 접속
-```
-
-### Step 5: 배포
-```bash
-git add .
-git commit -m "feat: Add optimized history section"
-git push origin main
-# Vercel 자동 배포
-```
+자세한 내용은 [RULES.md](./RULES.md)를 참조하세요.
 
 ---
 
-## 📦 **패키지 구성**
+## 프로젝트 개요
 
-### 🔴 **필수 파일** (반드시 확인)
+삼육보건대학교의 90주년을 기념하는 인터랙티브 웹사이트
 
-| 파일 | 용도 | 우선순위 |
-|------|------|----------|
-| **HistoryStory_NEXTJS.tsx** | Next.js용 최적화 컴포넌트 | ⭐⭐⭐⭐⭐ |
-| **QUICK_START_GUIDE.md** | 30분 통합 가이드 | ⭐⭐⭐⭐⭐ |
-| **NEXTJS_MIGRATION_GUIDE.md** | 상세 마이그레이션 가이드 | ⭐⭐⭐⭐ |
+### 기술 스택
 
-### 📚 **참고 문서**
+- Next.js 15.5, TypeScript, Tailwind CSS 4, Framer Motion 11
 
-| 파일 | 용도 |
-|------|------|
-| CHANGELOG_OPTIMIZATION.md | 최적화 상세 내역 |
-| BEFORE_AFTER_COMPARISON.md | Before/After 비교 |
-| FIGMA_MAKE_PROMPT.md | Figma Make용 프롬프트 |
-
----
-
-## ✅ **기술 스택 호환성**
-
-### Antigravity 환경 확인
-- ✅ **Next.js**: App Router 사용
-- ✅ **React**: 18.3+
-- ✅ **Tailwind CSS**: 설정됨
-- ✅ **Firebase**: 인증 & 데이터베이스
-- ✅ **Vercel**: 자동 배포
-
-### 변경 사항
-| 항목 | Figma Make | Antigravity | 상태 |
-|------|-----------|-------------|------|
-| 프레임워크 | Vite | Next.js | ✅ 조정 완료 |
-| 애니메이션 | `motion` | `framer-motion` | ✅ 수정 완료 |
-| 라우팅 | react-router-dom | App Router | ✅ 제거 완료 |
-| 클라이언트 | 자동 | `'use client'` | ✅ 추가 완료 |
-
----
-
-## 📊 **최적화 성과**
-
-### UX 개선
-| 지표 | 변경 전 | 변경 후 | 개선율 |
-|------|---------|---------|--------|
-| 불씨 등장 시간 | ~15초 | ~5초 | **67% ⬇️** |
-| 스크롤 높이 | 350vh | 200vh | **43% ⬇️** |
-| Act 체류 시간 | 6초 | 12초 | **100% ⬆️** |
-| 완주율 | 25% | 65% | **160% ⬆️** |
-| 사용자 만족도 | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | **67% ⬆️** |
-
-### 핵심 변경
-1. **불씨 조기 등장**: 10-20% → 3-8% 구간
-2. **스크롤 단축**: 350vh → 200vh
-3. **체류 시간 증가**: 각 Act 10-12초 보장
-4. **UX 요소 추가**: 진행도 인디케이터, 스크롤 힌트
-
----
-
-## 🎯 **주요 기능**
-
-### 스크롤 기반 스토리텔링
-- ✨ **불씨 등장**: 5초 내 핵심 모멘트
-- 📖 **4개 Act**: 고난 → 성장 → 확장 → 약속
-- 🎨 **시각 효과**: 파티클, 프리즘, 별빛
-- 📍 **진행도 표시**: 6단계 인디케이터
-
-### 반응형 디자인
-- 💻 **데스크톱**: 200vh 스크롤
-- 📱 **모바일**: 150vh 최적화
-- 🎯 **타블릿**: 자동 조정
-
----
-
-## 🔧 **Figma Make 원본 실행** (참고용)
-
-원본 Vite 프로젝트를 테스트하려면:
+### 시작하기
 
 ```bash
-# 이 폴더에서
 npm install
 npm run dev
 ```
 
-> ⚠️ **주의**: Antigravity에는 이 명령어를 사용하지 마세요.  
-> **HistoryStory_NEXTJS.tsx**를 사용하세요.
-
----
-
-## 📖 **문서 읽기 가이드**
-
-### 🟢 처음 시작하는 경우
-1. 이 README 읽기 (5분)
-2. **QUICK_START_GUIDE.md** 따라하기 (20분)
-3. 테스트 및 배포 (5분)
-
-### 🟡 자세히 이해하고 싶은 경우
-1. **NEXTJS_MIGRATION_GUIDE.md** 정독
-2. **CHANGELOG_OPTIMIZATION.md** 확인
-3. 단계별 적용
-
-### 🔴 깊이 분석하고 싶은 경우
-1. **BEFORE_AFTER_COMPARISON.md** 분석
-2. 원본과 최적화 코드 비교
-3. 커스터마이징
-
----
-
-## ⚠️ **자주 발생하는 이슈**
-
-### "Cannot use import statement outside a module"
-```typescript
-// 해결: 파일 최상단에 추가
-'use client';
-```
-
-### "motion is not defined"
-```typescript
-// ❌ 잘못됨
-import { motion } from "motion/react";
-
-// ✅ 올바름
-import { motion } from "framer-motion";
-```
-
-### "Module not found: framer-motion"
-```bash
-# 해결
-npm install framer-motion
-```
-
----
-
-## ✅ **검증 체크리스트**
-
-통합 후 반드시 확인:
-
-- [ ] 페이지 로드 성공 (에러 없음)
-- [ ] 불씨 5초 내 등장
-- [ ] 1936 타이틀 충분히 표시 (3초+)
-- [ ] Act 1 "고난" 가독성 (10초+)
-- [ ] 스크롤 부드러움
-- [ ] 모바일 정상 작동
-- [ ] 빌드 성공 (`npm run build`)
-- [ ] Vercel 배포 성공
-
----
-
-## 🆘 **문제 해결**
-
-### 콘솔 에러 확인
-```bash
-# 브라우저: F12 → Console 탭
-```
-
-### 캐시 삭제 후 재시작
-```bash
-rm -rf .next
-npm run dev
-```
-
-### 빌드 테스트
-```bash
-npm run build
-```
-
----
-
-## 📚 **추가 리소스**
-
-- [Next.js 공식 문서](https://nextjs.org/docs)
-- [Framer Motion 문서](https://www.framer.com/motion/)
-- [Tailwind CSS 문서](https://tailwindcss.com/docs)
-- [Firebase 문서](https://firebase.google.com/docs)
-
----
-
-## 🎉 **준비 완료!**
-
-모든 준비가 끝났습니다.  
-이제 **QUICK_START_GUIDE.md**를 열고  
-**30분 안에 완벽한 히스토리 섹션**을 만들어보세요! 🚀
-
----
-
-## 📝 **버전 정보**
-
-- **생성일**: 2024-12-19
-- **버전**: v2.0.0-nextjs-optimized
-- **호환성**: Next.js 14+, React 18+, Firebase, Vercel
-- **최적화**: 불씨 67% 빠름, 완주율 160% 증가
-
----
-
-## 💬 **피드백**
-
-문제가 있거나 개선 사항이 있다면:
-- GitHub Issues 등록
-- 팀 Slack/Discord 채널 문의
-
----
-
-**화이팅! 🎊**
+브라우저에서 http://localhost:3000 확인
