@@ -53,3 +53,6 @@ doc2/
 
 # invalid files
 nul
+
+.vercel
+.env*.local
