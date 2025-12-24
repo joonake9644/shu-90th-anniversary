@@ -30,39 +30,39 @@ export default function NewsEditPage() {
 
   // 뉴스 데이터 로드
   useEffect(() => {
+    const loadNews = async () => {
+      try {
+        setLoading(true);
+        const news = await getNewsById(newsId);
+
+        if (!news) {
+          setError('뉴스를 찾을 수 없습니다.');
+          return;
+        }
+
+        const publishedDate = typeof news.publishedAt === 'object' && news.publishedAt !== null && 'toDate' in news.publishedAt
+          ? news.publishedAt.toDate()
+          : new Date(news.publishedAt as string | number);
+
+        setFormData({
+          title: news.title,
+          summary: news.summary,
+          content: news.content,
+          thumbnail: news.thumbnail || '',
+          author: news.author,
+          category: news.category,
+          publishedAt: publishedDate.toISOString().split('T')[0],
+        });
+      } catch (err) {
+        console.error('Failed to load news:', err);
+        setError('뉴스를 불러오는데 실패했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadNews();
   }, [newsId]);
-
-  const loadNews = async () => {
-    try {
-      setLoading(true);
-      const news = await getNewsById(newsId);
-
-      if (!news) {
-        setError('뉴스를 찾을 수 없습니다.');
-        return;
-      }
-
-      const publishedDate = news.publishedAt.toDate
-        ? news.publishedAt.toDate()
-        : new Date(news.publishedAt);
-
-      setFormData({
-        title: news.title,
-        summary: news.summary,
-        content: news.content,
-        thumbnail: news.thumbnail || '',
-        author: news.author,
-        category: news.category,
-        publishedAt: publishedDate.toISOString().split('T')[0],
-      });
-    } catch (err) {
-      console.error('Failed to load news:', err);
-      setError('뉴스를 불러오는데 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleChange = (
     e: React.ChangeEvent<

@@ -90,7 +90,7 @@ export async function updateEvent(
 ): Promise<void> {
   const docRef = doc(db, COLLECTION_NAME, id);
 
-  const updateData: any = {};
+  const updateData: Record<string, unknown> = {};
 
   if (data.title) updateData.title = data.title;
   if (data.description) updateData.description = data.description;

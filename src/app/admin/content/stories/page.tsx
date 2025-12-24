@@ -110,9 +110,11 @@ export default function StoriesManagementPage() {
     }
   };
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: unknown) => {
     if (!timestamp) return '-';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const date = typeof timestamp === 'object' && timestamp !== null && 'toDate' in timestamp
+      ? (timestamp as { toDate: () => Date }).toDate()
+      : new Date(timestamp as string | number | Date);
     return date.toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: '2-digit',

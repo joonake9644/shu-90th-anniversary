@@ -93,7 +93,7 @@ export async function updateNews(
 ): Promise<void> {
   const docRef = doc(db, COLLECTION_NAME, id);
 
-  const updateData: any = {};
+  const updateData: Record<string, unknown> = {};
 
   if (data.title) updateData.title = data.title;
   if (data.summary) updateData.summary = data.summary;

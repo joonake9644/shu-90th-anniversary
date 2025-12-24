@@ -30,39 +30,39 @@ export default function EventEditPage() {
 
   // 이벤트 데이터 로드
   useEffect(() => {
+    const loadEvent = async () => {
+      try {
+        setLoading(true);
+        const event = await getEventById(eventId);
+
+        if (!event) {
+          setError('이벤트를 찾을 수 없습니다.');
+          return;
+        }
+
+        const eventDate = typeof event.date === 'object' && event.date !== null && 'toDate' in event.date
+          ? event.date.toDate()
+          : new Date(event.date as string | number);
+
+        setFormData({
+          title: event.title,
+          description: event.description,
+          location: event.location,
+          image: event.image || '',
+          registrationLink: event.registrationLink || '',
+          category: event.category,
+          date: eventDate.toISOString().slice(0, 16),
+        });
+      } catch (err) {
+        console.error('Failed to load event:', err);
+        setError('이벤트를 불러오는데 실패했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadEvent();
   }, [eventId]);
-
-  const loadEvent = async () => {
-    try {
-      setLoading(true);
-      const event = await getEventById(eventId);
-
-      if (!event) {
-        setError('이벤트를 찾을 수 없습니다.');
-        return;
-      }
-
-      const eventDate = event.date.toDate
-        ? event.date.toDate()
-        : new Date(event.date);
-
-      setFormData({
-        title: event.title,
-        description: event.description,
-        location: event.location,
-        image: event.image || '',
-        registrationLink: event.registrationLink || '',
-        category: event.category,
-        date: eventDate.toISOString().slice(0, 16),
-      });
-    } catch (err) {
-      console.error('Failed to load event:', err);
-      setError('이벤트를 불러오는데 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleChange = (
     e: React.ChangeEvent<

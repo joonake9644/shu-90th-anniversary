@@ -34,7 +34,7 @@ export default function AdminDashboardPage() {
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <p className="text-sm text-gray-400">로그인 계정</p>
-                <p className="text-sm font-medium">{user.email}</p>
+                <p className="text-sm font-medium">{user?.email}</p>
               </div>
               <button
                 onClick={handleLogout}
