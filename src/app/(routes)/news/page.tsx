@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SubPageLayout } from '@/components/layout/SubPageLayout';
 import { Calendar, ArrowRight, Tag } from 'lucide-react';
 import Image from 'next/image';
+import { subscribeNewsletter } from '@/lib/firestore/newsletter';
 
 interface NewsArticle {
   id: string;
@@ -86,11 +87,50 @@ const categories = ['전체', '시설', '협약', '수상', '장학', '기술', 
 export default function NewsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('전체');
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
+  const [email, setEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [subscribeMessage, setSubscribeMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   const filteredNews =
     selectedCategory === '전체'
       ? newsData
       : newsData.filter((news) => news.category === selectedCategory);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!email.trim()) {
+      setSubscribeMessage({
+        type: 'error',
+        text: '이메일을 입력해주세요.',
+      });
+      return;
+    }
+
+    setIsSubscribing(true);
+    setSubscribeMessage(null);
+
+    const result = await subscribeNewsletter(email);
+
+    setSubscribeMessage({
+      type: result.success ? 'success' : 'error',
+      text: result.message,
+    });
+
+    if (result.success) {
+      setEmail('');
+    }
+
+    setIsSubscribing(false);
+
+    // 3초 후 메시지 제거
+    setTimeout(() => {
+      setSubscribeMessage(null);
+    }, 3000);
+  };
 
   return (
     <SubPageLayout
@@ -157,16 +197,34 @@ export default function NewsPage() {
         <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
           최신 소식과 행사 안내를 이메일로 받아보세요
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto px-4">
+        <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto px-4">
           <input
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="이메일을 입력하세요"
-            className="flex-1 bg-black border border-white/20 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none"
+            disabled={isSubscribing}
+            className="flex-1 bg-black border border-white/20 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
           />
-          <button className="bg-amber-500 hover:bg-amber-600 text-black font-bold px-6 py-3 rounded-lg transition-colors">
-            구독하기
+          <button
+            type="submit"
+            disabled={isSubscribing}
+            className="bg-amber-500 hover:bg-amber-600 text-black font-bold px-6 py-3 rounded-lg transition-colors disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed"
+          >
+            {isSubscribing ? '처리 중...' : '구독하기'}
           </button>
-        </div>
+        </form>
+        {subscribeMessage && (
+          <motion.p
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`mt-4 text-sm ${
+              subscribeMessage.type === 'success' ? 'text-green-400' : 'text-red-400'
+            }`}
+          >
+            {subscribeMessage.text}
+          </motion.p>
+        )}
       </section>
 
       {/* Closing Message */}

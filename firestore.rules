@@ -1,0 +1,93 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============ 방명록 (Guestbook) ============
+    match /guestbook/{entryId} {
+      // 누구나 읽기 가능 (승인된 항목만)
+      allow read: if resource.data.approved == true;
+
+      // 누구나 작성 가능
+      allow create: if request.resource.data.keys().hasAll([
+        'name', 'graduationYear', 'message', 'isAnonymous',
+        'likes', 'approved', 'createdAt', 'updatedAt'
+      ])
+      && request.resource.data.name is string
+      && request.resource.data.graduationYear is int
+      && request.resource.data.message is string
+      && request.resource.data.message.size() > 0
+      && request.resource.data.message.size() <= 500
+      && request.resource.data.isAnonymous is bool
+      && request.resource.data.likes == 0
+      && request.resource.data.approved == true;
+
+      // 좋아요만 업데이트 가능
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['likes'])
+        && request.resource.data.likes == resource.data.likes + 1;
+
+      // 삭제는 불가 (관리자만 가능 - 별도 관리자 규칙 필요)
+      allow delete: if false;
+    }
+
+    // ============ 추억 게시판 (Memory Posts) ============
+    match /memoryPosts/{postId} {
+      // 승인된 게시물만 읽기 가능
+      allow read: if resource.data.approved == true;
+
+      // 누구나 작성 가능 (추후 인증 추가 가능)
+      allow create: if request.resource.data.keys().hasAll([
+        'authorName', 'title', 'content', 'images', 'memoryYear',
+        'hashtags', 'likes', 'commentCount', 'approved',
+        'createdAt', 'updatedAt'
+      ])
+      && request.resource.data.title.size() > 0
+      && request.resource.data.title.size() <= 100
+      && request.resource.data.content.size() > 0
+      && request.resource.data.content.size() <= 2000
+      && request.resource.data.images.size() <= 5
+      && request.resource.data.hashtags.size() <= 5
+      && request.resource.data.likes == 0
+      && request.resource.data.commentCount == 0;
+
+      // 좋아요와 댓글 수만 업데이트 가능
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['likes', 'commentCount']);
+
+      // 댓글 컬렉션
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if request.resource.data.content.size() > 0
+          && request.resource.data.content.size() <= 500;
+      }
+    }
+
+    // ============ 동문 프로필 (Alumni Profile) ============
+    match /alumniProfiles/{userId} {
+      // 공개된 프로필만 읽기 가능
+      allow read: if resource.data.isPublic == true;
+
+      // 인증된 사용자만 작성/수정 가능 (추후 구현)
+      allow write: if false; // 현재는 비활성화
+    }
+
+    // ============ 통계 데이터 (Statistics) ============
+    match /statistics/{docId} {
+      allow read: if true;
+      allow write: if false; // 관리자만 수정 가능
+    }
+
+    // ============ 이벤트 (Events) ============
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if false; // 관리자만 수정 가능
+    }
+
+    // ============ 뉴스 (News) ============
+    match /news/{articleId} {
+      allow read: if true;
+      allow write: if false; // 관리자만 수정 가능
+    }
+  }
+}

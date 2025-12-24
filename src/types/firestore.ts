@@ -115,3 +115,23 @@ export interface NewsArticle {
     publishedAt: Timestamp;
     createdAt: Timestamp;
 }
+
+// ============ 뉴스레터 구독 (Newsletter Subscribers) ============
+export interface NewsletterSubscriber {
+    id: string;
+    email: string;
+    subscribedAt: Timestamp;
+    isActive: boolean;
+}
+
+// ============ 사연 보내기 (Story Submissions) ============
+export interface StorySubmission {
+    id: string;
+    name: string;
+    email?: string;
+    graduationYear?: number;
+    title: string;
+    content: string;
+    isApproved: boolean;
+    createdAt: Timestamp;
+}

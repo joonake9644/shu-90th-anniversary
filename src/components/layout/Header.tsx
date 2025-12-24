@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Menu, Search, X } from 'lucide-react';
 import Link from 'next/link';
 import { MenuOverlay } from './MenuOverlay';
@@ -76,7 +77,13 @@ export function Header() {
 
 // Redefining proper export
 export function GlobalHeader() {
+    const pathname = usePathname();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    // 현재 경로가 /admin으로 시작하면 헤더를 표시하지 않음
+    if (pathname?.startsWith('/admin')) {
+        return null;
+    }
 
     return (
         <>
