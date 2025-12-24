@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  // Turbopack 설정 (Next.js 16+)
+  turbopack: {},
   webpack: (config) => {
     config.watchOptions = {
       ...config.watchOptions,
