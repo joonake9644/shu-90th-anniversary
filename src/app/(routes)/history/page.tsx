@@ -3,8 +3,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
-import { historyChapters } from '@/data/historyChapters';
+import { historyChapters as fallbackChapters } from '@/data/historyChapters';
+import { getPublicHistoryChapters } from '@/lib/firestore/public/history';
 import { Footer } from '@/components/layout/Footer';
+import type { HistoryChapter } from '@/data/historyChapters';
 
 /**
  * 별빛 아카이브 - Starlight Archive (고도화 버전)
@@ -13,6 +15,35 @@ import { Footer } from '@/components/layout/Footer';
 export default function HistoryPage() {
     const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
     const [isExploring, setIsExploring] = useState(false);
+    const [chapters, setChapters] = useState<HistoryChapter[]>(fallbackChapters);
+    const [loading, setLoading] = useState(true);
+
+    // Firestore에서 챕터 데이터 로드
+    useEffect(() => {
+        const loadChapters = async () => {
+            try {
+                const data = await getPublicHistoryChapters();
+                if (data.length > 0) {
+                    setChapters(data);
+                }
+            } catch (error) {
+                console.error('Error loading chapters from Firestore:', error);
+                // 에러 발생 시 fallback 데이터 사용
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadChapters();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <div className="text-white">로딩 중...</div>
+            </div>
+        );
+    }
 
     return (
         <main className="bg-black min-h-screen text-white overflow-x-hidden">
@@ -22,7 +53,7 @@ export default function HistoryPage() {
             {/* 별자리 타임라인 */}
             {isExploring && (
                 <ConstellationTimeline
-                    chapters={historyChapters}
+                    chapters={chapters}
                     onSelectChapter={setSelectedChapter}
                 />
             )}
@@ -31,7 +62,7 @@ export default function HistoryPage() {
             <AnimatePresence>
                 {selectedChapter !== null && (
                     <ChapterViewer
-                        chapter={historyChapters[selectedChapter - 1]}
+                        chapter={chapters[selectedChapter - 1]}
                         onClose={() => setSelectedChapter(null)}
                     />
                 )}
@@ -40,7 +71,7 @@ export default function HistoryPage() {
             {/* 챕터 스토리들 (고도화) */}
             {isExploring && (
                 <div className="relative">
-                    {historyChapters.map((chapter, index) => (
+                    {chapters.map((chapter, index) => (
                         <ChapterSection
                             key={chapter.chapter}
                             chapter={chapter}
@@ -250,7 +281,7 @@ function HeroSection({ onExplore }: { onExplore: () => void }) {
  * 별자리 타임라인 - 인터랙티브 네비게이션
  */
 function ConstellationTimeline({ chapters, onSelectChapter }: {
-    chapters: typeof historyChapters;
+    chapters: HistoryChapter[];
     onSelectChapter: (chapter: number) => void;
 }) {
     return (
@@ -341,7 +372,7 @@ function ConstellationTimeline({ chapters, onSelectChapter }: {
  * 별 포인트 - 각 챕터를 나타내는 인터랙티브 별
  */
 function StarPoint({ chapter, position, index, onClick }: {
-    chapter: typeof historyChapters[0];
+    chapter: HistoryChapter;
     position: { x: number; y: number };
     index: number;
     onClick: () => void;
@@ -439,7 +470,7 @@ function getStarPositions(count: number) {
  * 챕터 뷰어 - 풀스크린 모달
  */
 function ChapterViewer({ chapter, onClose }: {
-    chapter: typeof historyChapters[0];
+    chapter: HistoryChapter;
     onClose: () => void;
 }) {
     return (
@@ -548,7 +579,7 @@ function ChapterViewer({ chapter, onClose }: {
  * 챕터 섹션 - 스크롤 기반 스토리 (흑백→컬러 효과)
  */
 function ChapterSection({ chapter, index, onClick }: {
-    chapter: typeof historyChapters[0];
+    chapter: HistoryChapter;
     index: number;
     onClick: () => void;
 }) {
