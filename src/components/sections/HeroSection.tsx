@@ -1,309 +1,112 @@
 'use client';
 
-import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import Image from 'next/image';
+import React from 'react';
+import { motion, useScroll, useTransform } from "framer-motion";
 
-export function HeroSection() {
-    const containerRef = useRef<HTMLDivElement>(null);
+interface HeroSectionProps {
+    containerRef?: React.RefObject<HTMLElement | null>;
+}
 
-    // Overall scroll progress for the story container
-    // Optimization: Start slightly earlier and end slightly earlier to ensure full visibility
+export function HeroSection({ containerRef }: HeroSectionProps) {
     const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start start", "end end"]
+        container: containerRef,
+        offset: ["start start", "end start"]
     });
 
-    // --- STAGE 1: FAST ENTRY (0% - 20%) ---
-    // "90 Year History First Sentence" -> Spark Appearance
-    // Narrative 1: "Darkness" - Rapid appearance at the very start
-    const text1Opacity = useTransform(scrollYProgress, [0.02, 0.05, 0.08, 0.10], [0, 1, 1, 0]);
-    const text1Y = useTransform(scrollYProgress, [0.02, 0.10], ["20px", "-10px"]);
+    // Parallax: Image scales down and moves slightly
+    // "Deep Parallax" Strategy: Background stays longer (sticky feel) but darkens to merge with next section
+    const scale = useTransform(scrollYProgress, [0, 1], [1, 1.1]); // Subtle zoom
+    const y = useTransform(scrollYProgress, [0, 1], [0, 100]); // Moves down very slowly (parallax)
 
-    // Spark: Appears in the 10-20% range (Fast)
-    const sparkScale = useTransform(scrollYProgress, [0.10, 0.15, 0.20], [0.5, 1, 30]);
-    const sparkOpacity = useTransform(scrollYProgress, [0.10, 0.15, 0.20], [0, 1, 0]);
-    const sparkGlow = useTransform(scrollYProgress, [0.10, 0.20], ["0px", "40px"]);
+    // Create a "dissolve" effect into the next black section
+    const overlayOpacity = useTransform(scrollYProgress, [0, 0.8], [0.3, 0.9]);
 
-    // --- STAGE 2: SLOW APPRECIATION (20% - 100%) ---
-    // Spark -> "In Memory" -> History Years -> Acts
-
-    // Narrative 2: "Hope" - Bridge to 1936
-    const text2Opacity = useTransform(scrollYProgress, [0.15, 0.18, 0.22, 0.25], [0, 1, 1, 0]);
-    const text2Y = useTransform(scrollYProgress, [0.15, 0.25], ["20px", "-10px"]);
-
-    // Main Title: 1936 - The Anchor
-    const text1936Scale = useTransform(scrollYProgress, [0.20, 0.30], [0.8, 1.2]);
-    const text1936Opacity = useTransform(scrollYProgress, [0.20, 0.25, 0.30, 0.35], [0, 1, 1, 0]);
-
-    // Prologue Fade Out
-    const prologueOpacity = useTransform(scrollYProgress, [0, 0.30, 0.35], [1, 1, 0]);
-
-    // ACT 1: HARDSHIP (35% - 50%)
-    const act1Opacity = useTransform(scrollYProgress, [0.35, 0.40, 0.48, 0.50], [0, 1, 1, 0]);
-    const act1X = useTransform(scrollYProgress, [0.35, 0.50], ["5%", "-5%"]);
-
-    // ACT 2: FOREST OF TRUTH (50% - 70%)
-    const act2Opacity = useTransform(scrollYProgress, [0.50, 0.55, 0.65, 0.70], [0, 1, 1, 0]);
-    const treePathLength = useTransform(scrollYProgress, [0.52, 0.68], [0, 1]);
-
-    // ACT 3: PRISM OF LOVE (70% - 85%)
-    const act3Opacity = useTransform(scrollYProgress, [0.70, 0.75, 0.82, 0.85], [0, 1, 1, 0]);
-    const prismRotate = useTransform(scrollYProgress, [0.70, 0.85], [0, 180]);
-    const prismScale = useTransform(scrollYProgress, [0.70, 0.80], [0.5, 1.2]);
-
-    // EPILOGUE: PROMISE (85% - 100%)
-    const epilogueOpacity = useTransform(scrollYProgress, [0.85, 0.90], [0, 1]);
-    const circleScale = useTransform(scrollYProgress, [0.88, 1], [0.1, 4]);
-    const starOpacity = useTransform(scrollYProgress, [0.85, 0.95], [0, 1]);
-
-    // State for random values to avoid hydration mismatch
-    const [worldPoints, setWorldPoints] = React.useState<{ top: string, left: string, delay: number }[]>([]);
-    const [stars, setStars] = React.useState<{ top: string, left: string, delay: number, duration: number }[]>([]);
-
-    React.useEffect(() => {
-        // Generate world points on client side
-        setWorldPoints([...Array(8)].map((_, i) => ({
-            top: `${20 + Math.random() * 60}%`,
-            left: `${10 + Math.random() * 80}%`,
-            delay: i * 0.5
-        })));
-
-        // Generate stars on client side
-        setStars([...Array(50)].map(() => ({
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
-            delay: Math.random() * 2,
-            duration: 2 + Math.random() * 2 // Varible duration 2-4s
-        })));
-    }, []);
+    // Text Parallax: Accelerates UP and dissolves
+    // This creates a "flying through" feeling
+    const textY = useTransform(scrollYProgress, [0, 1], [0, -200]); // Moves up faster
+    const bigTextScale = useTransform(scrollYProgress, [0, 0.5], [1, 1.8]); // Expands drastically
+    const contentOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]); // Fades out early
+    const contentBlur = useTransform(scrollYProgress, [0, 0.4], ["blur(0px)", "blur(10px)"]);
 
     return (
-        <div ref={containerRef} className="relative bg-black text-white w-full h-[350vh]">
-            {/* --- STICKY CANVAS --- */}
-            <div className="sticky top-0 w-full h-screen overflow-hidden flex items-center justify-center">
+        <section className="relative h-screen flex flex-col items-center justify-center overflow-hidden bg-black text-white">
+            {/* Background Layer */}
+            <motion.div
+                style={{ scale, y }}
+                className="absolute inset-0 z-0 w-full h-full"
+            >
+                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1730307403182-46906ab72173?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx1bml2ZXJzaXR5JTIwY2FtcHVzJTIwaGlzdG9yeSUyMG9sZCUyMGJ1aWxkaW5nJTIwYmxhY2slMjBhbmQlMjB3aGl0ZXxlbnwxfHx8fDE3NjU3ODkxMjF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral')] bg-cover bg-center grayscale opacity-60" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40" />
+                {/* Dynamic Darkening Overlay for seamless transition */}
+                <motion.div
+                    style={{ opacity: overlayOpacity }}
+                    className="absolute inset-0 bg-black"
+                />
 
-                {/* PROLOGUE LAYER */}
-                <motion.div style={{ opacity: prologueOpacity }} className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black">
+                {/* CSS Noise Overlay */}
+                <div className="absolute inset-0 opacity-[0.08] pointer-events-none mix-blend-overlay"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
+                />
+            </motion.div>
 
-                    {/* Narrative 1: Darkness */}
+            {/* Content Layer */}
+            <div className="relative z-10 container mx-auto px-6 text-center">
+                <motion.div
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} // smooth ease
+                    style={{ y: textY, opacity: contentOpacity, filter: contentBlur }}
+                >
                     <motion.div
-                        style={{ opacity: text1Opacity, y: text1Y }}
-                        className="absolute top-[40%] text-center z-10"
+                        className="inline-block overflow-hidden mb-6"
+                        initial={{ width: 0 }}
+                        animate={{ width: "auto" }}
+                        transition={{ duration: 1, delay: 0.5, ease: "easeInOut" }}
                     >
-                        <p className="text-white/40 font-serif italic text-lg tracking-widest">
-                            In the deepest darkness...
-                        </p>
+                        <span className="block py-2 px-6 border border-white/30 rounded-full text-sm tracking-[0.3em] backdrop-blur-md whitespace-nowrap">
+                            THE 90TH ANNIVERSARY
+                        </span>
                     </motion.div>
 
-                    {/* Narrative 2: Awakening */}
                     <motion.div
-                        style={{ opacity: text2Opacity, y: text2Y }}
-                        className="absolute top-[40%] text-center z-10"
+                        style={{ scale: bigTextScale }}
+                        className="flex items-baseline justify-center mb-4 leading-[0.85] mix-blend-overlay"
                     >
-                        <p className="text-amber-100/60 font-serif italic text-lg tracking-widest">
-                            A light awakens
-                        </p>
+                        <span className="text-7xl md:text-9xl lg:text-[11rem] font-bold tracking-tighter">
+                            90
+                        </span>
+                        <span className="text-7xl md:text-9xl lg:text-[11rem] font-bold tracking-tighter ml-4 italic font-light">
+                            YEARS
+                        </span>
                     </motion.div>
 
-                    {/* The Spark */}
-                    <motion.div
-                        style={{
-                            scale: sparkScale,
-                            opacity: sparkOpacity,
-                            boxShadow: useTransform(sparkGlow, (v: string) => `0 0 ${v} 4px rgba(251,191,36,0.6)`)
-                        }}
-                        className="w-1 h-1 md:w-2 md:h-2 bg-amber-100 rounded-full z-20"
-                    />
-
-                    {/* The Title: 1936 */}
-                    <motion.h1
-                        style={{ scale: text1936Scale, opacity: text1936Opacity }}
-                        className="absolute text-8xl md:text-[12rem] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-t from-white to-amber-100 drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] z-30"
-                    >
-                        1936
-                    </motion.h1>
-                    <motion.p
-                        style={{ opacity: text1936Opacity }}
-                        className="absolute top-[65%] text-amber-100/60 font-serif tracking-widest uppercase text-sm"
-                    >
-                        The Spark of Compassion
-                    </motion.p>
-                </motion.div>
-
-                {/* ACT 1: HARDSHIP (The Roots) */}
-                <motion.div style={{ opacity: act1Opacity }} className="absolute inset-0 z-40 bg-zinc-900 flex items-center justify-center overflow-hidden">
-                    {/* Background Grain/Noise Overlay */}
-                    <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
-
-                    <div className="relative w-full h-full max-w-7xl mx-auto flex items-center justify-center p-8">
-                        {/* Content Container */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                            <motion.div style={{ x: act1X }} className="relative">
-                                <div className="relative aspect-[4/5] bg-gray-800 overflow-hidden grayscale contrast-125 rounded-sm border border-white/10 shadow-2xl">
-                                    <Image
-                                        src="https://images.unsplash.com/photo-1516570161687-0b1a7742d87a?q=80&w=1200&auto=format&fit=crop"
-                                        alt="Hardship"
-                                        fill
-                                        className="object-cover opacity-60"
-                                    />
-                                    {/* Gold Glow on Subject (Simulated) */}
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-amber-500/20 rounded-full blur-[40px] mix-blend-color-dodge"></div>
-                                </div>
-                                <div className="absolute -bottom-8 -right-8 text-9xl font-bold text-white/5 z-0 select-none">
-                                    ROOTS
-                                </div>
-                            </motion.div>
-
-                            <div className="z-10 space-y-6 text-left">
-                                <h2 className="text-4xl md:text-6xl font-bold font-serif leading-tight">
-                                    <span className="text-amber-500/80">고난</span>, 그 깊은 뿌리
-                                </h2>
-                                <p className="text-lg md:text-xl text-white/70 leading-relaxed font-light">
-                                    전쟁과 폐허 속에서도 꺼지지 않았던 등불.<br />
-                                    류제한 박사의 천막 병원은 절망을 희망으로 바꾸는<br />
-                                    거룩한 성소였습니다.
-                                </p>
-                                <div className="w-12 h-[1px] bg-amber-500/50 my-8"></div>
-                                <p className="text-sm text-white/40 font-mono uppercase tracking-widest">
-                                    1936 - 1953 · The Era of Endurance
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-
-                {/* ACT 2: FOREST OF TRUTH (Growth) */}
-                <motion.div style={{ opacity: act2Opacity }} className="absolute inset-0 z-30 bg-[#1a1815] flex items-center justify-center">
-                    {/* SVG Growth Animation */}
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30" preserveAspectRatio="none">
-                        <motion.path
-                            d="M 200,1000 Q 400,500 200,0"
-                            fill="none"
-                            stroke="#d4cbb8"
-                            strokeWidth="2"
-                            style={{ pathLength: treePathLength }}
-                        />
-                        <motion.path
-                            d="M 600,1000 Q 500,500 600,0"
-                            fill="none"
-                            stroke="#d4cbb8"
-                            strokeWidth="1"
-                            style={{ pathLength: treePathLength }}
-                        />
-                        <motion.path
-                            d="M 1000,1000 Q 1200,600 1000,0"
-                            fill="none"
-                            stroke="#d4cbb8"
-                            strokeWidth="3"
-                            style={{ pathLength: treePathLength }}
-                        />
-                    </svg>
-
-                    <div className="relative z-10 text-center max-w-4xl px-6">
-                        <h2 className="text-5xl md:text-7xl font-bold text-[#d4cbb8] mb-8 font-serif">
-                            진리의 숲을 이루다
-                        </h2>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 opacity-80">
-                            {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="aspect-square bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm flex items-center justify-center group hover:bg-white/10 transition-colors">
-                                    <span className="text-2xl font-light text-white/30 group-hover:text-white/80 transition-colors">Year {1950 + (i * 10)}</span>
-                                </div>
-                            ))}
-                        </div>
-                        <p className="text-xl md:text-2xl text-[#d4cbb8]/70 mt-12 font-light font-serif">
-                            한 그루의 나무가 숲이 되기까지,<br />
-                            우리는 멈추지 않고 자라났습니다.
-                        </p>
-                    </div>
-                </motion.div>
-
-                {/* ACT 3: PRISM OF LOVE (Expansion) */}
-                <motion.div style={{ opacity: act3Opacity }} className="absolute inset-0 z-20 bg-gradient-to-br from-slate-900 to-blue-950 flex items-center justify-center overflow-hidden">
-                    {/* Prism Effect */}
-                    <motion.div
-                        style={{ rotate: prismRotate, scale: prismScale }}
-                        className="absolute w-[500px] h-[500px] md:w-[800px] md:h-[800px] rounded-full bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-teal-500/20 blur-[60px] animate-pulse"
-                    />
-
-                    <div className="relative z-10 w-full max-w-6xl px-6 flex flex-col items-center">
-                        <div className="mb-12">
-                            <span className="inline-block py-1 px-3 rounded-full border border-blue-400/30 text-blue-300 text-xs tracking-widest uppercase bg-blue-500/10 backdrop-blur-md">
-                                Global Impact
-                            </span>
-                        </div>
-
-                        <h2 className="text-5xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-white text-center leading-tight mb-8">
-                            세상으로 번지는<br />사랑의 빛
+                    <div>
+                        <h2 className="text-4xl md:text-6xl font-light tracking-widest uppercase mb-4 text-gray-300">
+                            Of History
                         </h2>
 
-                        {/* Simulated World Map Points */}
-                        <div className="w-full h-64 md:h-96 relative border-t border-b border-white/10 mt-8 flex items-center justify-center">
-                            <p className="text-white/20 text-lg tracking-[1em] uppercase">Connecting The World</p>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.8, duration: 1 }}
+                            className="text-lg md:text-2xl font-medium tracking-[0.3em] uppercase mb-8 text-white/80"
+                        >
+                            Sahmyook Health University
+                        </motion.div>
 
-                            {/* Random light points */}
-                            {worldPoints.map((point, i) => (
-                                <motion.div
-                                    key={i}
-                                    className="absolute w-2 h-2 bg-blue-400 rounded-full blur-[1px] shadow-[0_0_10px_rgba(96,165,250,0.8)]"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: [0.2, 1, 0.2], scale: [1, 1.5, 1] }}
-                                    transition={{ duration: 3, delay: point.delay, repeat: Infinity }}
-                                    style={{
-                                        top: point.top,
-                                        left: point.left
-                                    }}
-                                />
-                            ))}
-                        </div>
+                        <motion.p
+                            className="max-w-xl mx-auto text-lg text-gray-400 font-light leading-relaxed"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 1, duration: 1 }}
+                        >
+                            삼육보건대학교 90주년, <br />
+                            진심의 교육으로 세상을 치유해온 시간
+                        </motion.p>
                     </div>
                 </motion.div>
-
-                {/* EPILOGUE: PROMISE (Future) */}
-                <motion.div style={{ opacity: epilogueOpacity }} className="absolute inset-0 z-10 bg-black flex flex-col items-center justify-center overflow-hidden">
-                    {/* Starfield */}
-                    <div className="absolute inset-0">
-                        {stars.map((star, i) => (
-                            <motion.div
-                                key={i}
-                                style={{
-                                    opacity: starOpacity,
-                                    top: star.top,
-                                    left: star.left
-                                }}
-                                className="absolute w-1 h-1 bg-white rounded-full"
-                                initial={{ opacity: 0, scale: 0 }}
-                                animate={{ opacity: [0, 1, 0], scale: [0, 1.5, 0] }} // Simplified animation for cleaner loop
-                                transition={{ duration: star.duration, repeat: Infinity, delay: star.delay }}
-                            />
-                        ))}
-                    </div>
-
-                    {/* The Circle Door */}
-                    <motion.div
-                        style={{ scale: circleScale }}
-                        className="absolute w-[30vh] h-[30vh] rounded-full border-[1px] border-white/80 shadow-[0_0_50px_rgba(255,255,255,0.5)]"
-                    />
-
-                    <div className="relative z-20 text-center">
-                        <h3 className="text-2xl md:text-3xl text-white/60 font-light mb-4 tracking-widest uppercase">
-                            Our Promise
-                        </h3>
-                        <h1 className="text-5xl md:text-8xl font-bold text-white mb-8 tracking-tighter">
-                            100년을 향한 약속
-                        </h1>
-                        <p className="text-lg text-white/80 max-w-lg mx-auto leading-relaxed">
-                            지난 90년의 역사가 그러했듯,<br />
-                            앞으로의 100년도 변함없는 사랑으로<br />
-                            세상을 비추겠습니다.
-                        </p>
-                        <button className="mt-12 px-8 py-4 bg-white text-black text-sm font-bold tracking-widest hover:bg-white/90 transition-colors uppercase">
-                            Join the Journey
-                        </button>
-                    </div>
-                </motion.div>
-
             </div>
-        </div>
+
+        </section>
     );
 }
