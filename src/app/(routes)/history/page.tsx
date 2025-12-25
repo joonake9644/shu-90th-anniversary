@@ -5,8 +5,10 @@ import { HeroSection } from '@/components/sections/HeroSection';
 import { TimelineIntro } from '@/components/sections/TimelineIntro';
 import HistoryStory from '@/components/sections/HistoryStory';
 import { MarqueeSection } from '@/components/sections/MarqueeSection';
+import { HistoryChapter } from '@/components/sections/HistoryChapter';
 import { PeriodSection } from '@/components/sections/PeriodSection';
 import { timelineData } from '@/data/timelineData';
+import { historyChapters } from '@/data/historyChapters';
 import { TimelineProgressBar } from '@/components/layout/TimelineProgressBar';
 import { Footer } from '@/components/layout/Footer';
 
@@ -36,6 +38,20 @@ export default function HistoryPage() {
 
             {/* The Scrollytelling Story (High-level narrative) */}
             <HistoryStory />
+
+            {/* Divider */}
+            <MarqueeSection text="90년, 사랑과 봉사의 여정" />
+
+            {/* 감동적인 역사 챕터들 */}
+            <div className="relative">
+                {historyChapters.map((chapter, index) => (
+                    <HistoryChapter
+                        key={chapter.chapter}
+                        {...chapter}
+                        reverse={index % 2 === 1}
+                    />
+                ))}
+            </div>
 
             {/* Divider */}
             <MarqueeSection text="History of 90 Years" />
