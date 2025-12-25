@@ -60,31 +60,17 @@ export default function HistoryPage() {
 }
 
 /**
- * Hero Section - 고급스러운 별빛 반짝임
+ * Hero Section - 에필로그 스타일 심플한 별빛
  */
 function HeroSection({ onExplore }: { onExplore: () => void }) {
-    // 고급스러운 별빛 (2025 트렌드: 절제되고 우아한 효과)
-    const [elegantStars] = useState(() =>
-        [...Array(60)].map(() => ({
+    // 심플한 별빛 (에필로그 스타일)
+    const [simpleStars] = useState(() =>
+        [...Array(30)].map(() => ({
             x: Math.random() * 100,
             y: Math.random() * 100,
-            size: Math.random() * 1.5 + 0.5,
+            size: Math.random() * 1 + 1,
             duration: Math.random() * 4 + 3,
-            delay: Math.random() * 5,
-            // 색상 변화 (흰색 → 블루/골드 틴트)
-            colorType: Math.random() > 0.7 ? 'warm' : 'cool'
-        }))
-    );
-
-    // 강조 별빛 (포인트 효과)
-    const [accentStars] = useState(() =>
-        [...Array(12)].map(() => ({
-            x: Math.random() * 100,
-            y: Math.random() * 100,
-            size: Math.random() * 2 + 1.5,
-            duration: Math.random() * 6 + 4,
-            delay: Math.random() * 8,
-            colorType: Math.random() > 0.5 ? 'warm' : 'cool'
+            delay: Math.random() * 5
         }))
     );
 
@@ -98,92 +84,29 @@ function HeroSection({ onExplore }: { onExplore: () => void }) {
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(147,197,253,0.05),transparent_70%)]" />
             </div>
 
-            {/* 고급스러운 별빛 레이어 (2025 트렌드) - z-index: 1 */}
+            {/* 심플한 별빛 (에필로그 스타일) - z-index: 1 */}
             <div className="absolute inset-0 z-[1] pointer-events-none">
-                {elegantStars.map((star, i) => (
+                {simpleStars.map((star, i) => (
                     <motion.div
-                        key={`elegant-star-${i}`}
-                        className="absolute rounded-full"
+                        key={`simple-star-${i}`}
+                        className="absolute w-1 h-1 bg-white rounded-full"
                         style={{
                             left: `${star.x}%`,
                             top: `${star.y}%`,
-                            width: `${star.size}px`,
-                            height: `${star.size}px`,
                         }}
                         animate={{
-                            opacity: [0.2, 0.9, 0.2],
-                            scale: [1, 1.4, 1],
-                            y: [0, -30, 0],
-                            backgroundColor: star.colorType === 'warm'
-                                ? ['rgba(255,255,255,0.9)', 'rgba(255,235,205,1)', 'rgba(255,255,255,0.9)']
-                                : ['rgba(255,255,255,0.9)', 'rgba(200,220,255,1)', 'rgba(255,255,255,0.9)'],
-                            boxShadow: star.colorType === 'warm'
-                                ? [
-                                    '0 0 4px rgba(255,255,255,0.3)',
-                                    '0 0 12px rgba(255,220,150,0.8)',
-                                    '0 0 4px rgba(255,255,255,0.3)'
-                                  ]
-                                : [
-                                    '0 0 4px rgba(255,255,255,0.3)',
-                                    '0 0 12px rgba(147,197,253,0.8)',
-                                    '0 0 4px rgba(255,255,255,0.3)'
-                                  ]
+                            opacity: [0.2, 1, 0.2],
+                            y: [0, -40, 0],
+                            scale: [1, 1.5, 1]
                         }}
                         transition={{
                             duration: star.duration,
                             repeat: Infinity,
                             delay: star.delay,
-                            ease: [0.45, 0.05, 0.55, 0.95] // 최신 easing curve
+                            ease: "easeInOut"
                         }}
                     />
                 ))}
-            </div>
-
-            {/* 강조 별빛 - 포인트 효과 - z-index: 2 */}
-            <div className="absolute inset-0 z-[2] pointer-events-none">
-                {accentStars.map((star, i) => (
-                    <motion.div
-                        key={`accent-star-${i}`}
-                        className="absolute rounded-full"
-                        style={{
-                            left: `${star.x}%`,
-                            top: `${star.y}%`,
-                            width: `${star.size}px`,
-                            height: `${star.size}px`,
-                            filter: 'blur(0.5px)'
-                        }}
-                        animate={{
-                            opacity: [0.3, 1, 0.3],
-                            scale: [1, 1.8, 1],
-                            rotate: [0, 180, 360],
-                            backgroundColor: star.colorType === 'warm'
-                                ? ['rgba(255,255,255,0.95)', 'rgba(251,191,36,1)', 'rgba(255,255,255,0.95)']
-                                : ['rgba(255,255,255,0.95)', 'rgba(96,165,250,1)', 'rgba(255,255,255,0.95)'],
-                            boxShadow: star.colorType === 'warm'
-                                ? [
-                                    '0 0 8px rgba(255,255,255,0.4)',
-                                    '0 0 20px rgba(251,191,36,0.9), 0 0 40px rgba(251,191,36,0.4)',
-                                    '0 0 8px rgba(255,255,255,0.4)'
-                                  ]
-                                : [
-                                    '0 0 8px rgba(255,255,255,0.4)',
-                                    '0 0 20px rgba(96,165,250,0.9), 0 0 40px rgba(96,165,250,0.4)',
-                                    '0 0 8px rgba(255,255,255,0.4)'
-                                  ]
-                        }}
-                        transition={{
-                            duration: star.duration,
-                            repeat: Infinity,
-                            delay: star.delay,
-                            ease: [0.45, 0.05, 0.55, 0.95]
-                        }}
-                    />
-                ))}
-            </div>
-
-            {/* 미묘한 별똥별 (고급스럽게 조절) - z-index: 3 */}
-            <div className="absolute inset-0 z-[3]">
-                <ElegantShootingStars />
             </div>
 
             {/* Earth Glow */}
@@ -322,92 +245,6 @@ function HeroSection({ onExplore }: { onExplore: () => void }) {
     );
 }
 
-/**
- * 고급스러운 별똥별 (2025 트렌드)
- */
-function ElegantShootingStars() {
-    const [shootingStars, setShootingStars] = useState<Array<{
-        id: number;
-        startX: number;
-        startY: number;
-        duration: number;
-        colorType: 'warm' | 'cool';
-    }>>([]);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const newStar = {
-                id: Date.now(),
-                startX: Math.random() * 100,
-                startY: Math.random() * 40,
-                duration: Math.random() * 2 + 1.5,
-                colorType: (Math.random() > 0.6 ? 'warm' : 'cool') as 'warm' | 'cool'
-            };
-
-            setShootingStars(prev => [...prev, newStar]);
-
-            setTimeout(() => {
-                setShootingStars(prev => prev.filter(star => star.id !== newStar.id));
-            }, newStar.duration * 1000);
-        }, 5000); // 더 긴 간격으로 조절
-
-        return () => clearInterval(interval);
-    }, []);
-
-    return (
-        <>
-            {shootingStars.map(star => (
-                <motion.div
-                    key={star.id}
-                    className="absolute w-1 h-1 rounded-full"
-                    style={{
-                        left: `${star.startX}%`,
-                        top: `${star.startY}%`,
-                        backgroundColor: star.colorType === 'warm' ? 'rgba(255,245,235,1)' : 'rgba(255,255,255,1)',
-                        boxShadow: star.colorType === 'warm'
-                            ? '0 0 6px 2px rgba(251,191,36,0.6), 0 0 12px 4px rgba(251,191,36,0.3)'
-                            : '0 0 6px 2px rgba(147,197,253,0.6), 0 0 12px 4px rgba(147,197,253,0.3)'
-                    }}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{
-                        opacity: [0, 0.9, 0.9, 0],
-                        scale: [0, 1, 1, 0.3],
-                        x: [0, 280],
-                        y: [0, 180],
-                    }}
-                    transition={{
-                        duration: star.duration,
-                        ease: [0.45, 0.05, 0.55, 0.95]
-                    }}
-                >
-                    {/* 미묘한 꼬리 효과 */}
-                    <motion.div
-                        className="absolute right-0 top-0 w-20 h-px"
-                        style={{
-                            transformOrigin: 'right center',
-                            rotate: '-30deg',
-                            background: star.colorType === 'warm'
-                                ? 'linear-gradient(to right, rgba(255,245,235,0.9), rgba(251,191,36,0.4), transparent)'
-                                : 'linear-gradient(to right, rgba(255,255,255,0.9), rgba(147,197,253,0.4), transparent)',
-                            boxShadow: star.colorType === 'warm'
-                                ? '0 0 3px rgba(251,191,36,0.4)'
-                                : '0 0 3px rgba(147,197,253,0.4)'
-                        }}
-                        initial={{ scaleX: 0, opacity: 0 }}
-                        animate={{
-                            scaleX: [0, 1, 1, 0],
-                            opacity: [0, 0.8, 0.8, 0]
-                        }}
-                        transition={{
-                            duration: star.duration,
-                            ease: [0.45, 0.05, 0.55, 0.95]
-                        }}
-                    />
-                </motion.div>
-            ))}
-        </>
-    );
-}
 
 /**
  * 별자리 타임라인 - 인터랙티브 네비게이션
