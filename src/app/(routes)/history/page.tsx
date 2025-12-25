@@ -60,26 +60,48 @@ export default function HistoryPage() {
 }
 
 /**
- * Hero Section - 고도화된 우주 배경
+ * Hero Section - 극적이고 몽환적인 우주 배경
  */
 function HeroSection({ onExplore }: { onExplore: () => void }) {
-    // 일반 별들 (300개로 증가, 밝기 50% 증가)
-    const [stars] = useState(() =>
-        [...Array(300)].map(() => ({
+    // 배경 별들 (뒤쪽 레이어)
+    const [backgroundStars] = useState(() =>
+        [...Array(200)].map(() => ({
             x: Math.random() * 100,
             y: Math.random() * 100,
-            size: Math.random() * 3 + 0.5, // 크기 증가
-            duration: Math.random() * 2 + 1.5, // 더 빠른 반짝임
+            size: Math.random() * 2.5 + 0.5,
+            duration: Math.random() * 2 + 1.5,
             delay: Math.random() * 3
+        }))
+    );
+
+    // 전경 별들 (앞쪽 레이어 - 글자 위에)
+    const [foregroundStars] = useState(() =>
+        [...Array(150)].map(() => ({
+            x: Math.random() * 100,
+            y: Math.random() * 100,
+            size: Math.random() * 3 + 0.8,
+            duration: Math.random() * 2.5 + 1,
+            delay: Math.random() * 4
         }))
     );
 
     // 큰 별들 (밝아졌다 흐려지는 효과)
     const [bigStars] = useState(() =>
-        [...Array(15)].map(() => ({
+        [...Array(20)].map(() => ({
             x: Math.random() * 100,
             y: Math.random() * 100,
-            size: Math.random() * 4 + 3,
+            size: Math.random() * 5 + 3,
+            duration: Math.random() * 5 + 3,
+            delay: Math.random() * 6
+        }))
+    );
+
+    // 떠다니는 별 파티클 (에필로그 스타일)
+    const [floatingStars] = useState(() =>
+        [...Array(100)].map(() => ({
+            x: Math.random() * 100,
+            y: Math.random() * 100,
+            size: Math.random() * 2 + 0.5,
             duration: Math.random() * 4 + 3,
             delay: Math.random() * 5
         }))
@@ -88,30 +110,33 @@ function HeroSection({ onExplore }: { onExplore: () => void }) {
     return (
         <section className="relative h-screen flex items-center justify-center overflow-hidden">
             {/* Space Background with gradient */}
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-gradient-to-b from-indigo-950/30 via-black to-black" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.15),transparent_50%)]" />
+                {/* 시네마틱 빛 광선 */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(147,197,253,0.05),transparent_70%)]" />
             </div>
 
-            {/* 일반 별들 - 50% 강화된 반짝임 */}
-            <div className="absolute inset-0">
-                {stars.map((star, i) => (
+            {/* 배경 별들 레이어 (뒤쪽) - z-index: 1 */}
+            <div className="absolute inset-0 z-[1]">
+                {backgroundStars.map((star, i) => (
                     <motion.div
-                        key={`star-${i}`}
-                        className="absolute bg-white rounded-full shadow-[0_0_4px_rgba(255,255,255,0.8)]"
+                        key={`bg-star-${i}`}
+                        className="absolute bg-white rounded-full"
                         style={{
                             left: `${star.x}%`,
                             top: `${star.y}%`,
                             width: `${star.size}px`,
-                            height: `${star.size}px`
+                            height: `${star.size}px`,
+                            filter: 'blur(0.5px)'
                         }}
                         animate={{
-                            opacity: [0.3, 1, 0.3], // 밝기 범위 증가
-                            scale: [1, 1.8, 1], // 크기 변화 증가
+                            opacity: [0.2, 0.8, 0.2],
+                            scale: [1, 1.6, 1],
                             boxShadow: [
-                                '0 0 2px rgba(255,255,255,0.5)',
-                                '0 0 8px rgba(255,255,255,1)',
-                                '0 0 2px rgba(255,255,255,0.5)'
+                                '0 0 2px rgba(255,255,255,0.4)',
+                                '0 0 6px rgba(255,255,255,0.9)',
+                                '0 0 2px rgba(255,255,255,0.4)'
                             ]
                         }}
                         transition={{
@@ -124,8 +149,8 @@ function HeroSection({ onExplore }: { onExplore: () => void }) {
                 ))}
             </div>
 
-            {/* 큰 별들 - 서서히 밝아졌다 흐려지는 효과 */}
-            <div className="absolute inset-0">
+            {/* 큰 별들 - 서서히 밝아졌다 흐려지는 효과 - z-index: 2 */}
+            <div className="absolute inset-0 z-[2]">
                 {bigStars.map((star, i) => (
                     <motion.div
                         key={`big-star-${i}`}
@@ -137,17 +162,17 @@ function HeroSection({ onExplore }: { onExplore: () => void }) {
                             height: `${star.size}px`
                         }}
                         animate={{
-                            opacity: [0.2, 0.9, 0.2],
-                            scale: [1, 1.5, 1],
+                            opacity: [0.2, 0.95, 0.2],
+                            scale: [1, 1.8, 1],
                             background: [
-                                'radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%)',
-                                'radial-gradient(circle, rgba(255,220,100,1) 0%, rgba(255,255,255,0.6) 50%, transparent 70%)',
-                                'radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%)'
+                                'radial-gradient(circle, rgba(255,255,255,0.9) 0%, transparent 70%)',
+                                'radial-gradient(circle, rgba(255,220,100,1) 0%, rgba(255,255,255,0.7) 50%, transparent 70%)',
+                                'radial-gradient(circle, rgba(255,255,255,0.9) 0%, transparent 70%)'
                             ],
                             boxShadow: [
-                                '0 0 10px rgba(255,255,255,0.3)',
-                                '0 0 30px rgba(255,220,100,0.8), 0 0 60px rgba(255,220,100,0.4)',
-                                '0 0 10px rgba(255,255,255,0.3)'
+                                '0 0 15px rgba(255,255,255,0.4)',
+                                '0 0 40px rgba(255,220,100,0.9), 0 0 80px rgba(255,220,100,0.5)',
+                                '0 0 15px rgba(255,255,255,0.4)'
                             ]
                         }}
                         transition={{
@@ -160,8 +185,38 @@ function HeroSection({ onExplore }: { onExplore: () => void }) {
                 ))}
             </div>
 
-            {/* 별똥별 애니메이션 */}
-            <ShootingStars />
+            {/* 별똥별 애니메이션 - z-index: 3 */}
+            <div className="absolute inset-0 z-[3]">
+                <ShootingStars />
+            </div>
+
+            {/* 떠다니는 별 파티클 (에필로그 스타일) - z-index: 4 */}
+            <div className="absolute inset-0 z-[4] pointer-events-none">
+                {floatingStars.map((star, i) => (
+                    <motion.div
+                        key={`float-star-${i}`}
+                        className="absolute rounded-full bg-white"
+                        style={{
+                            left: `${star.x}%`,
+                            top: `${star.y}%`,
+                            width: `${star.size}px`,
+                            height: `${star.size}px`
+                        }}
+                        animate={{
+                            opacity: [0.1, 0.8, 0.1],
+                            y: [0, -50, 0],
+                            x: [0, Math.random() * 20 - 10, 0],
+                            scale: [1, 1.8, 1]
+                        }}
+                        transition={{
+                            duration: star.duration,
+                            repeat: Infinity,
+                            delay: star.delay,
+                            ease: "easeInOut"
+                        }}
+                    />
+                ))}
+            </div>
 
             {/* Earth Glow */}
             <motion.div
@@ -180,8 +235,8 @@ function HeroSection({ onExplore }: { onExplore: () => void }) {
                 }}
             />
 
-            {/* Content */}
-            <div className="relative z-10 text-center px-6 max-w-5xl">
+            {/* Content - z-index: 5 */}
+            <div className="relative z-[5] text-center px-6 max-w-5xl">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -287,9 +342,46 @@ function HeroSection({ onExplore }: { onExplore: () => void }) {
                 </motion.button>
             </div>
 
-            {/* Ambient Light Effects */}
-            <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] animate-pulse" />
-            <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1.5s' }} />
+            {/* 전경 별들 레이어 (앞쪽 - 글자 위에) - z-index: 20 */}
+            <div className="absolute inset-0 z-20 pointer-events-none">
+                {foregroundStars.map((star, i) => (
+                    <motion.div
+                        key={`fg-star-${i}`}
+                        className="absolute bg-white rounded-full"
+                        style={{
+                            left: `${star.x}%`,
+                            top: `${star.y}%`,
+                            width: `${star.size}px`,
+                            height: `${star.size}px`,
+                            filter: 'blur(0.8px)',
+                            boxShadow: '0 0 10px rgba(255,255,255,0.6)'
+                        }}
+                        animate={{
+                            opacity: [0.3, 1, 0.3],
+                            scale: [1, 2.2, 1],
+                            boxShadow: [
+                                '0 0 4px rgba(255,255,255,0.5)',
+                                '0 0 12px rgba(255,255,255,1), 0 0 24px rgba(147,197,253,0.6)',
+                                '0 0 4px rgba(255,255,255,0.5)'
+                            ]
+                        }}
+                        transition={{
+                            duration: star.duration,
+                            repeat: Infinity,
+                            delay: star.delay,
+                            ease: "easeInOut"
+                        }}
+                    />
+                ))}
+            </div>
+
+            {/* Ambient Light Effects - z-index: 1 */}
+            <div className="absolute inset-0 z-[1]">
+                <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] animate-pulse" />
+                <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1.5s' }} />
+                {/* 추가 시네마틱 효과 */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-400/5 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '3s', animationDuration: '8s' }} />
+            </div>
         </section>
     );
 }
@@ -310,55 +402,55 @@ function ShootingStars() {
             const newStar = {
                 id: Date.now(),
                 startX: Math.random() * 100,
-                startY: Math.random() * 40, // 화면 상단 40%에서 시작
+                startY: Math.random() * 40,
                 duration: Math.random() * 1.5 + 1
             };
 
             setShootingStars(prev => [...prev, newStar]);
 
-            // 애니메이션 완료 후 제거
             setTimeout(() => {
                 setShootingStars(prev => prev.filter(star => star.id !== newStar.id));
             }, newStar.duration * 1000);
-        }, 3000); // 3초마다 새 별똥별
+        }, 3000);
 
         return () => clearInterval(interval);
     }, []);
 
     return (
-        <div className="absolute inset-0 pointer-events-none">
+        <>
             {shootingStars.map(star => (
                 <motion.div
                     key={star.id}
-                    className="absolute w-1 h-1 bg-white rounded-full"
+                    className="absolute w-1.5 h-1.5 bg-white rounded-full"
                     style={{
                         left: `${star.startX}%`,
                         top: `${star.startY}%`,
-                        boxShadow: '0 0 6px 2px rgba(255, 255, 255, 0.8), 0 0 12px 4px rgba(147, 197, 253, 0.4)'
+                        boxShadow: '0 0 8px 3px rgba(255, 255, 255, 0.9), 0 0 16px 6px rgba(147, 197, 253, 0.5)'
                     }}
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{
                         opacity: [0, 1, 1, 0],
-                        scale: [0, 1, 1, 0.5],
-                        x: [0, 300],
-                        y: [0, 200],
+                        scale: [0, 1.2, 1.2, 0.5],
+                        x: [0, 350],
+                        y: [0, 230],
                     }}
                     transition={{
                         duration: star.duration,
                         ease: [0.25, 0.1, 0.25, 1]
                     }}
                 >
-                    {/* 꼬리 효과 */}
+                    {/* 꼬리 효과 - 더 길고 밝게 */}
                     <motion.div
-                        className="absolute right-0 top-0 w-24 h-px bg-gradient-to-r from-white via-blue-200 to-transparent"
+                        className="absolute right-0 top-0 w-32 h-px bg-gradient-to-r from-white via-blue-200 to-transparent"
                         style={{
                             transformOrigin: 'right center',
-                            rotate: '-30deg'
+                            rotate: '-30deg',
+                            boxShadow: '0 0 4px rgba(255, 255, 255, 0.6)'
                         }}
                         initial={{ scaleX: 0, opacity: 0 }}
                         animate={{
                             scaleX: [0, 1, 1, 0],
-                            opacity: [0, 0.8, 0.8, 0]
+                            opacity: [0, 0.9, 0.9, 0]
                         }}
                         transition={{
                             duration: star.duration,
@@ -367,7 +459,7 @@ function ShootingStars() {
                     />
                 </motion.div>
             ))}
-        </div>
+        </>
     );
 }
 
