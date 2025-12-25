@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { ADMIN_ROUTES } from '@/lib/constants/routes';
 
@@ -15,14 +15,23 @@ interface AdminLayoutProps {
  */
 export function AdminLayoutWrapper({ children }: AdminLayoutProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, loading } = useAuth();
 
-  // 로그인하지 않은 경우 로그인 페이지로 리다이렉트
+  // 로그인 페이지는 인증 체크 제외
+  const isLoginPage = pathname === ADMIN_ROUTES.LOGIN;
+
+  // 로그인하지 않은 경우 로그인 페이지로 리다이렉트 (로그인 페이지가 아닐 때만)
   useEffect(() => {
-    if (!loading && !user) {
+    if (!isLoginPage && !loading && !user) {
       router.push(ADMIN_ROUTES.LOGIN);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, isLoginPage]);
+
+  // 로그인 페이지는 그대로 렌더링
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   // 로딩 중
   if (loading) {
