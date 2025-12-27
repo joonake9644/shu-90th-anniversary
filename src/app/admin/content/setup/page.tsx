@@ -178,6 +178,144 @@ export default function SetupPage() {
       }
       addLog('✅ 이벤트 데이터 완료 (3개)');
 
+      // 7. Periods 데이터 (6단계 역사 + Highlights)
+      addLog('Periods & Highlights 데이터 생성 중...');
+      const periodsData = [
+        {
+          id: 'period-1',
+          order: 1,
+          rangeLabel: '1936 ~ 1946',
+          yearStart: 1936,
+          yearEnd: 1946,
+          title: 'Beginning 태동기',
+          subtitle: '민족의 건강과 교육을 위한 첫 걸음\nFirst Step for Nation\'s Health',
+          heroMedia: 'https://images.unsplash.com/photo-1689858210110-03f1e91f8c69?w=1920',
+          enabled: true,
+          highlights: [
+            {
+              title: '경성요양병원 부속 간호원 양성소 설립',
+              year: '1936',
+              thumb: 'https://images.unsplash.com/photo-1726313475738-5c8428158210?w=800',
+              description: '진리, 사랑, 봉사의 이념으로 첫 발을 내딛다.',
+              order: 1,
+              enabled: true
+            },
+            {
+              title: '제1회 졸업식 거행',
+              year: '1940',
+              thumb: 'https://images.unsplash.com/photo-1730307403182-46906ab72173?w=800',
+              description: '전쟁의 아픔 속에서도 배출된 첫 번째 나이팅게일들.',
+              order: 2,
+              enabled: true
+            }
+          ]
+        },
+        {
+          id: 'period-2',
+          order: 2,
+          rangeLabel: '1947 ~ 1956',
+          yearStart: 1947,
+          yearEnd: 1956,
+          title: 'Reconstruction 정착·재건기',
+          subtitle: '시련을 딛고 다시 일어서다\nRising Again from Hardship',
+          heroMedia: 'https://images.unsplash.com/photo-1717995045633-2579ba884150?w=1920',
+          enabled: true,
+          highlights: [
+            {
+              title: '서울위생병원 간호고등기술학교 승격',
+              year: '1948',
+              thumb: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800',
+              description: '전문 교육 기관으로서의 체계 확립.',
+              order: 1,
+              enabled: true
+            }
+          ]
+        },
+        {
+          id: 'period-3',
+          order: 3,
+          rangeLabel: '1957 ~ 1996',
+          yearStart: 1957,
+          yearEnd: 1996,
+          title: 'Growth 성장기',
+          subtitle: '전문 대학으로서의 기틀 마련\nFoundation as a College',
+          heroMedia: 'https://images.unsplash.com/photo-1589982334488-2ce2b65244ed?w=1920',
+          enabled: true,
+          highlights: [
+            {
+              title: '학관 건축 및 캠퍼스 확장',
+              year: '1974',
+              thumb: 'https://images.unsplash.com/photo-1676555263970-63e72d69642a?w=800',
+              description: '늘어나는 학생들을 위한 최신식 교육 시설 완공.',
+              order: 1,
+              enabled: true
+            }
+          ]
+        }
+      ];
+
+      for (const period of periodsData) {
+        const periodRef = doc(db, 'homepage_periods', period.id);
+        const { highlights, ...periodData } = period;
+
+        await setDoc(periodRef, periodData);
+
+        // Highlights subcollection 생성
+        for (const highlight of highlights) {
+          await addDoc(collection(periodRef, 'highlights'), highlight);
+        }
+      }
+      addLog('✅ Periods 데이터 완료 (3개 Period + Highlights)');
+
+      // 8. Videos 데이터
+      addLog('Videos 데이터 생성 중...');
+      const videosData = [
+        {
+          title: '개교 기념식 - 1936년의 감동',
+          description: '1936년 경성요양병원 부속 간호원 양성소 설립 당시의 역사적 순간을 재현한 다큐멘터리',
+          year: '1936',
+          duration: '5:32',
+          thumbnail: 'https://images.unsplash.com/photo-1689858210110-03f1e91f8c69?w=800',
+          videoUrl: 'https://www.youtube.com/watch?v=example1',
+          category: '기념식',
+          period: '1936-1946',
+          order: 1,
+          featured: true,
+          enabled: true,
+        },
+        {
+          title: 'WCC 선정 기념 다큐멘터리',
+          description: '2013년 세계적 수준의 전문대학(WCC) 선정을 기념하는 특별 다큐멘터리',
+          year: '2013',
+          duration: '15:00',
+          thumbnail: 'https://images.unsplash.com/photo-1710616836472-ff86042cd881?w=800',
+          videoUrl: 'https://www.youtube.com/watch?v=example2',
+          category: '기념식',
+          period: '1997-2016',
+          order: 2,
+          featured: false,
+          enabled: true,
+        },
+        {
+          title: '90주년 기념 메시지',
+          description: '개교 90주년을 맞아 총장, 교직원, 동문들이 전하는 축하 메시지',
+          year: '2026',
+          duration: '4:50',
+          thumbnail: 'https://images.unsplash.com/photo-1591218214141-45545921d2d9?w=800',
+          videoUrl: 'https://www.youtube.com/watch?v=example3',
+          category: '기념식',
+          period: '2025-Beyond',
+          order: 3,
+          featured: true,
+          enabled: true,
+        }
+      ];
+
+      for (const video of videosData) {
+        await addDoc(collection(db, 'videos'), video);
+      }
+      addLog('✅ Videos 데이터 완료 (3개)');
+
       addLog('🎉 모든 초기 데이터 설정 완료!');
       addLog('✨ 이제 각 관리자 페이지에서 데이터를 확인하고 수정할 수 있습니다.');
 
@@ -233,14 +371,14 @@ export default function SetupPage() {
         {/* 생성될 데이터 목록 */}
         <div className="mt-8 bg-white/5 border border-white/10 rounded-lg p-6">
           <h3 className="text-white font-bold mb-4">📦 생성될 데이터</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div className="bg-black/30 rounded p-3">
               <div className="text-amber-500 font-bold mb-1">Hero Section</div>
-              <div className="text-gray-400 text-sm">배경 이미지, 타이틀 등</div>
+              <div className="text-gray-400 text-sm">배경 이미지, 타이틀</div>
             </div>
             <div className="bg-black/30 rounded p-3">
               <div className="text-amber-500 font-bold mb-1">Footer</div>
-              <div className="text-gray-400 text-sm">푸터 정보, 링크 등</div>
+              <div className="text-gray-400 text-sm">푸터 정보, 링크</div>
             </div>
             <div className="bg-black/30 rounded p-3">
               <div className="text-amber-500 font-bold mb-1">Marquee</div>
@@ -258,6 +396,14 @@ export default function SetupPage() {
               <div className="text-amber-500 font-bold mb-1">이벤트</div>
               <div className="text-gray-400 text-sm">더미 이벤트 3개</div>
             </div>
+            <div className="bg-black/30 rounded p-3">
+              <div className="text-amber-500 font-bold mb-1">Periods</div>
+              <div className="text-gray-400 text-sm">3개 Period + Highlights</div>
+            </div>
+            <div className="bg-black/30 rounded p-3">
+              <div className="text-amber-500 font-bold mb-1">Videos</div>
+              <div className="text-gray-400 text-sm">더미 동영상 3개</div>
+            </div>
           </div>
         </div>
 
@@ -268,8 +414,11 @@ export default function SetupPage() {
             <div>• <a href="/admin/content/hero" className="text-blue-400 hover:underline">/admin/content/hero</a> - Hero 섹션 편집</div>
             <div>• <a href="/admin/content/footer" className="text-blue-400 hover:underline">/admin/content/footer</a> - Footer 편집</div>
             <div>• <a href="/admin/content/marquee" className="text-blue-400 hover:underline">/admin/content/marquee</a> - Marquee 편집</div>
+            <div>• <a href="/admin/content/timeline-intro" className="text-blue-400 hover:underline">/admin/content/timeline-intro</a> - Timeline Intro 편집</div>
             <div>• <a href="/admin/content/news" className="text-blue-400 hover:underline">/admin/content/news</a> - 뉴스 관리</div>
             <div>• <a href="/admin/content/events" className="text-blue-400 hover:underline">/admin/content/events</a> - 이벤트 관리</div>
+            <div>• <a href="/admin/content/periods" className="text-blue-400 hover:underline">/admin/content/periods</a> - 6단계 역사 관리</div>
+            <div>• <a href="/admin/content/videos" className="text-blue-400 hover:underline">/admin/content/videos</a> - 동영상 관리</div>
             <div>• <a href="/" className="text-blue-400 hover:underline">메인 홈페이지</a> - 변경사항 확인</div>
           </div>
         </div>
