@@ -49,6 +49,7 @@ import { getPublicMarqueeTexts } from '@/lib/firestore/public/marquee';
 import type { MarqueeText } from '@/lib/firestore/admin/marquee';
 import { getPublicPeriodsWithHighlights } from '@/lib/firestore/public/periods';
 import type { PeriodWithHighlights } from '@/lib/firestore/public/periods';
+import { timelineData } from '@/data/timelineData';
 
 // Fallback Marquee 데이터
 const fallbackMarquees: MarqueeText[] = [
@@ -70,10 +71,13 @@ const fallbackMarquees: MarqueeText[] = [
   }
 ];
 
+// Fallback Period 데이터 (Firestore 로드 실패 시 사용)
+const fallbackPeriods: PeriodWithHighlights[] = timelineData as PeriodWithHighlights[];
+
 export default function Home() {
     const [activePeriod, setActivePeriod] = useState<string | null>(null);
     const [marquees, setMarquees] = useState<MarqueeText[]>(fallbackMarquees);
-    const [periods, setPeriods] = useState<PeriodWithHighlights[]>([]);
+    const [periods, setPeriods] = useState<PeriodWithHighlights[]>(fallbackPeriods); // Fallback 데이터로 초기화
     const [loading, setLoading] = useState(true);
 
     // Marquee & Period 데이터 로드
@@ -91,9 +95,10 @@ export default function Home() {
                 if (periodData && periodData.length > 0) {
                     setPeriods(periodData);
                 }
+                // Firestore 데이터가 없으면 fallback 데이터 유지
             } catch (error) {
                 console.error('Error loading data:', error);
-                // Fallback 사용 (timelineData)
+                // Fallback 데이터(timelineData)가 이미 초기값으로 설정됨
             } finally {
                 setLoading(false);
             }
