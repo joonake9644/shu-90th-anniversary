@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SubPageLayout } from '@/components/layout/SubPageLayout';
-import { timelineData, Highlight } from '@/data/timelineData';
+import { getPublicPeriodsWithHighlights, type PeriodWithHighlights } from '@/lib/firestore/public/periods';
+import type { Highlight } from '@/lib/firestore/admin/highlights';
 import Image from 'next/image';
 
 // 모든 하이라이트를 Period 정보와 함께 추출
@@ -15,10 +16,25 @@ interface HighlightWithPeriod extends Highlight {
 
 export default function HighlightsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<string>('all');
+  const [periodsData, setPeriodsData] = useState<PeriodWithHighlights[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch periods and highlights from Firestore
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      const data = await getPublicPeriodsWithHighlights();
+      if (data) {
+        setPeriodsData(data);
+      }
+      setIsLoading(false);
+    }
+    fetchData();
+  }, []);
 
   // 모든 하이라이트를 추출하고 Period 정보 추가
   const allHighlights: HighlightWithPeriod[] = useMemo(() => {
-    return timelineData.flatMap((period) =>
+    return periodsData.flatMap((period) =>
       period.highlights.map((highlight) => ({
         ...highlight,
         periodTitle: period.title,
@@ -26,7 +42,7 @@ export default function HighlightsPage() {
         periodId: period.id,
       }))
     );
-  }, []);
+  }, [periodsData]);
 
   // 필터링된 하이라이트
   const filteredHighlights = useMemo(() => {
@@ -47,7 +63,7 @@ export default function HighlightsPage() {
             onClick={() => setSelectedPeriod('all')}
             label="전체"
           />
-          {timelineData.map((period) => (
+          {periodsData.map((period) => (
             <FilterButton
               key={period.id}
               active={selectedPeriod === period.id}

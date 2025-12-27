@@ -1,11 +1,62 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Facebook, Instagram, Youtube, ArrowUpRight } from 'lucide-react';
-// import { motion } from 'motion/react'; // Not strictly needed for the static footer parts, keeping it simple.
+import { getPublicFooterContent } from '@/lib/firestore/public/footer';
+import type { HomepageFooter } from '@/lib/firestore/admin/footer';
+
+// Fallback 데이터 (Firestore 오류 시 사용)
+const fallbackFooter: HomepageFooter = {
+  id: 'main',
+  brandName: 'SHU 90th',
+  slogan: 'Truth · Love · Service',
+  description: 'Celebrating 90 years of excellence in health education.\nPreparing for the next century of innovation and service.',
+  socialLinks: {
+    instagram: 'https://www.instagram.com/shu_university/',
+    facebook: 'https://www.facebook.com/sahmyookhealth',
+    youtube: 'https://www.youtube.com/@SHU_Official'
+  },
+  quickLinks: [
+    { label: 'History 1936-2026', href: '#' },
+    { label: 'Vision 2030', href: '#' },
+    { label: 'Campus Map', href: '#' },
+    { label: 'Anniversary Events', href: '#' }
+  ],
+  contact: {
+    address: '82 Mangu-ro, Dongdaemun-gu,\nSeoul, Republic of Korea',
+    phone: '+82-2212-0082',
+    email: 'admin@shu.ac.kr'
+  },
+  copyrightText: 'Sahmyook Health University. All rights reserved.',
+  privacyPolicyUrl: '#',
+  termsOfServiceUrl: '#'
+};
 
 export function Footer() {
     const currentYear = new Date().getFullYear();
+
+    // CMS 콘텐츠 상태
+    const [footer, setFooter] = useState<HomepageFooter>(fallbackFooter);
+    const [loading, setLoading] = useState(true);
+
+    // Firestore에서 콘텐츠 로드
+    useEffect(() => {
+        const loadFooter = async () => {
+            try {
+                const data = await getPublicFooterContent();
+                if (data) {
+                    setFooter(data);
+                }
+            } catch (error) {
+                console.error('Error loading footer content:', error);
+                // Fallback 데이터 사용
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadFooter();
+    }, []);
 
     return (
         <footer className="bg-zinc-950 border-t border-white/10 relative overflow-hidden text-white">
@@ -19,22 +70,21 @@ export function Footer() {
                     <div className="md:col-span-5 lg:col-span-4 space-y-6">
                         <div className="space-y-2">
                             <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tighter">
-                                SHU 90th
+                                {footer.brandName}
                             </h2>
                             <p className="text-sm font-medium tracking-widest text-blue-400 uppercase">
-                                Truth · Love · Service
+                                {footer.slogan}
                             </p>
                         </div>
-                        <p className="text-zinc-400 leading-relaxed max-w-sm">
-                            Celebrating 90 years of excellence in health education.
-                            Preparing for the next century of innovation and service.
+                        <p className="text-zinc-400 leading-relaxed max-w-sm whitespace-pre-line">
+                            {footer.description}
                         </p>
 
                         {/* Social Icons (Vector) */}
                         <div className="flex items-center gap-4 pt-4">
-                            <SocialLink href="https://www.instagram.com/shu_university/" icon={<Instagram size={20} />} label="Instagram" />
-                            <SocialLink href="https://www.facebook.com/sahmyookhealth" icon={<Facebook size={20} />} label="Facebook" />
-                            <SocialLink href="https://www.youtube.com/@SHU_Official" icon={<Youtube size={20} />} label="Youtube" />
+                            <SocialLink href={footer.socialLinks.instagram} icon={<Instagram size={20} />} label="Instagram" />
+                            <SocialLink href={footer.socialLinks.facebook} icon={<Facebook size={20} />} label="Facebook" />
+                            <SocialLink href={footer.socialLinks.youtube} icon={<Youtube size={20} />} label="Youtube" />
                         </div>
                     </div>
 
@@ -42,10 +92,9 @@ export function Footer() {
                     <div className="md:col-span-3 lg:col-span-4">
                         <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">Explore</h3>
                         <ul className="space-y-4">
-                            <FooterLink href="#">History 1936-2026</FooterLink>
-                            <FooterLink href="#">Vision 2030</FooterLink>
-                            <FooterLink href="#">Campus Map</FooterLink>
-                            <FooterLink href="#">Anniversary Events</FooterLink>
+                            {footer.quickLinks.map((link, index) => (
+                                <FooterLink key={index} href={link.href}>{link.label}</FooterLink>
+                            ))}
                         </ul>
                     </div>
 
@@ -55,22 +104,22 @@ export function Footer() {
                         <div className="space-y-4 text-zinc-400">
                             <div className="group flex flex-col gap-1">
                                 <span className="text-xs text-zinc-600 uppercase tracking-widest group-hover:text-blue-400 transition-colors">Address</span>
-                                <p className="hover:text-white transition-colors">
-                                    82 Mangu-ro, Dongdaemun-gu,<br />Seoul, Republic of Korea
+                                <p className="hover:text-white transition-colors whitespace-pre-line">
+                                    {footer.contact.address}
                                 </p>
                             </div>
 
                             <div className="group flex flex-col gap-1">
                                 <span className="text-xs text-zinc-600 uppercase tracking-widest group-hover:text-blue-400 transition-colors">Tel</span>
                                 <p className="hover:text-white transition-colors font-mono">
-                                    +82-2212-0082
+                                    {footer.contact.phone}
                                 </p>
                             </div>
 
                             <div className="group flex flex-col gap-1">
                                 <span className="text-xs text-zinc-600 uppercase tracking-widest group-hover:text-blue-400 transition-colors">Email</span>
                                 <p className="hover:text-white transition-colors">
-                                    admin@shu.ac.kr
+                                    {footer.contact.email}
                                 </p>
                             </div>
                         </div>
@@ -79,10 +128,10 @@ export function Footer() {
 
                 {/* Bottom Bar */}
                 <div className="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-zinc-600">
-                    <p>© {currentYear} Sahmyook Health University. All rights reserved.</p>
+                    <p>© {currentYear} {footer.copyrightText}</p>
                     <div className="flex items-center gap-6">
-                        <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-                        <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+                        <a href={footer.privacyPolicyUrl} className="hover:text-white transition-colors">Privacy Policy</a>
+                        <a href={footer.termsOfServiceUrl} className="hover:text-white transition-colors">Terms of Service</a>
                     </div>
                 </div>
             </div>

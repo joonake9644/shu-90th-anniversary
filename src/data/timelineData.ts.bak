@@ -5,28 +5,34 @@ export interface Highlight {
   year: string;
   thumb: string;
   description: string;
+  order: number;
+  enabled: boolean;
 }
 
 export interface Period {
   id: string;
+  order: number;
   rangeLabel: string;
   yearStart: number;
   yearEnd: number;
   title: string;
   subtitle: string;
   heroMedia: string;
+  enabled: boolean;
   highlights: Highlight[];
 }
 
 export const timelineData: Period[] = [
   {
     id: "period-1",
+    order: 1,
     rangeLabel: "1936 ~ 1946",
     yearStart: 1936,
     yearEnd: 1946,
     title: "Beginning 태동기",
     subtitle: "민족의 건강과 교육을 위한 첫 걸음\nFirst Step for Nation's Health",
     heroMedia: "https://images.unsplash.com/photo-1689858210110-03f1e91f8c69?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwaG9zcGl0YWwlMjAxOTMwc3xlbnwxfHx8fDE3NjU5NjM2MDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    enabled: true,
     highlights: [
       {
         id: "h1",
@@ -46,12 +52,14 @@ export const timelineData: Period[] = [
   },
   {
     id: "period-2",
+    order: 2,
     rangeLabel: "1947 ~ 1956",
     yearStart: 1947,
     yearEnd: 1956,
     title: "Reconstruction 정착·재건기",
     subtitle: "시련을 딛고 다시 일어서다\nRising Again from Hardship",
     heroMedia: "https://images.unsplash.com/photo-1717995045633-2579ba884150?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvbGQlMjBtZWRpY2FsJTIwc2Nob29sJTIwYnVpbGRpbmd8ZW58MXx8fHwxNzY1OTYzNjA1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    enabled: true,
     highlights: [
       {
         id: "h2_1",
@@ -71,12 +79,14 @@ export const timelineData: Period[] = [
   },
   {
     id: "period-3",
+    order: 3,
     rangeLabel: "1957 ~ 1996",
     yearStart: 1957,
     yearEnd: 1996,
     title: "Growth 성장기",
     subtitle: "전문 대학으로서의 기틀 마련\nFoundation as a College",
     heroMedia: "https://images.unsplash.com/photo-1589982334488-2ce2b65244ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwdW5pdmVyc2l0eSUyMGNhbXB1c3xlbnwxfHx8fDE3NjU5NjM2MDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    enabled: true,
     highlights: [
       {
         id: "h3_1",
@@ -110,12 +120,14 @@ export const timelineData: Period[] = [
   },
   {
     id: "period-4",
+    order: 4,
     rangeLabel: "1997 ~ 2016",
     yearStart: 1997,
     yearEnd: 2016,
     title: "Take-off 도약기",
     subtitle: "글로벌 보건 의료 인재 양성\nCultivating Global Health Talents",
     heroMedia: "https://images.unsplash.com/photo-1679653226697-2b0fbf7c17f7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjB1bml2ZXJzaXR5JTIwYnVpbGRpbmd8ZW58MXx8fHwxNzY1OTYzNjA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    enabled: true,
     highlights: [
       {
         id: "h4_1",
@@ -156,12 +168,14 @@ export const timelineData: Period[] = [
   },
   {
     id: "period-5",
+    order: 5,
     rangeLabel: "2017 ~ 2024",
     yearStart: 2017,
     yearEnd: 2024,
     title: "Innovation 혁신·융합기",
     subtitle: "디지털 대전환과 교육 혁신\nDigital Transformation & Educational Innovation",
     heroMedia: "https://images.unsplash.com/photo-1695048441421-369a04a8df27?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwaGVhbHRoY2FyZSUyMHRlY2hub2xvZ3l8ZW58MXx8fHwxNzY1OTYzNjA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    enabled: true,
     highlights: [
       {
         id: "h5_1",
@@ -188,12 +202,14 @@ export const timelineData: Period[] = [
   },
   {
     id: "period-6",
+    order: 6,
     rangeLabel: "2025 ~ Beyond",
     yearStart: 2025,
     yearEnd: 2036,
     title: "Future Vision 미래비전",
     subtitle: "세상에서 가장 입학하고 싶은 대학\nThe Most Desirable University",
     heroMedia: "https://images.unsplash.com/photo-1612886649688-ef2912f17921?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmdXR1cmlzdGljJTIwbWVkaWNhbCUyMHRlY2hub2xvZ3l8ZW58MXx8fHwxNzY1OTYzNjA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    enabled: true,
     highlights: [
       {
         id: "h6_1",

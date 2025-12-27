@@ -1,11 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, useInView, useSpring } from "framer-motion";
-import { Period } from '../../data/timelineData';
+import type { PeriodWithHighlights } from '@/lib/firestore/public/periods';
 import { HighlightCard } from '../ui/HighlightCard';
 import { TextReveal } from '../ui/TextReveal';
 
 interface PeriodSectionProps {
-  period: Period;
+  period: PeriodWithHighlights;
   onInView: (id: string) => void;
   containerRef?: React.RefObject<HTMLElement>;
 }

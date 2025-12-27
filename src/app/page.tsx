@@ -37,18 +37,70 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HeroSection } from '@/components/sections/HeroSection';
 import { TimelineIntro } from '@/components/sections/TimelineIntro';
 import HistoryStory from '@/components/sections/HistoryStory';
 import { MarqueeSection } from '@/components/sections/MarqueeSection';
 import { PeriodSection } from '@/components/sections/PeriodSection';
-import { timelineData } from '@/data/timelineData';
 import { TimelineProgressBar } from '@/components/layout/TimelineProgressBar';
 import { Footer } from '@/components/layout/Footer';
+import { getPublicMarqueeTexts } from '@/lib/firestore/public/marquee';
+import type { MarqueeText } from '@/lib/firestore/admin/marquee';
+import { getPublicPeriodsWithHighlights } from '@/lib/firestore/public/periods';
+import type { PeriodWithHighlights } from '@/lib/firestore/public/periods';
+
+// Fallback Marquee 데이터
+const fallbackMarquees: MarqueeText[] = [
+  {
+    id: 'marquee1',
+    position: 1,
+    text: 'History of 90 Years',
+    direction: 'left',
+    speed: 5,
+    enabled: true
+  },
+  {
+    id: 'marquee2',
+    position: 2,
+    text: 'Toward 100 Years',
+    direction: 'right',
+    speed: 5,
+    enabled: true
+  }
+];
 
 export default function Home() {
     const [activePeriod, setActivePeriod] = useState<string | null>(null);
+    const [marquees, setMarquees] = useState<MarqueeText[]>(fallbackMarquees);
+    const [periods, setPeriods] = useState<PeriodWithHighlights[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Marquee & Period 데이터 로드
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                // Marquee 데이터 로드
+                const marqueeData = await getPublicMarqueeTexts();
+                if (marqueeData.length > 0) {
+                    setMarquees(marqueeData);
+                }
+
+                // Period & Highlight 데이터 로드
+                const periodData = await getPublicPeriodsWithHighlights();
+                if (periodData && periodData.length > 0) {
+                    setPeriods(periodData);
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                // Fallback 사용 (timelineData)
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadData();
+    }, []);
 
     const handleInView = (id: string) => {
         setActivePeriod(id);
@@ -74,12 +126,18 @@ export default function Home() {
             {/* The Scrollytelling Story (High-level narrative) */}
             <HistoryStory />
 
-            {/* Divider */}
-            <MarqueeSection text="History of 90 Years" />
+            {/* Divider - Marquee 1 */}
+            {marquees[0] && marquees[0].enabled && (
+                <MarqueeSection
+                    text={marquees[0].text}
+                    direction={marquees[0].direction}
+                    speed={marquees[0].speed}
+                />
+            )}
 
             {/* Detailed Period Sections */}
             <div className="relative z-10">
-                {timelineData.map((period) => (
+                {periods.map((period) => (
                     <PeriodSection
                         key={period.id}
                         period={period}
@@ -88,13 +146,19 @@ export default function Home() {
                 ))}
             </div>
 
-            {/* Footer Divider */}
-            <MarqueeSection text="Toward 100 Years" direction="right" />
+            {/* Footer Divider - Marquee 2 */}
+            {marquees[1] && marquees[1].enabled && (
+                <MarqueeSection
+                    text={marquees[1].text}
+                    direction={marquees[1].direction}
+                    speed={marquees[1].speed}
+                />
+            )}
 
             <Footer />
 
             <TimelineProgressBar
-                periods={timelineData}
+                periods={periods}
                 activePeriodId={activePeriod}
                 onPeriodSelect={handlePeriodSelect}
             />

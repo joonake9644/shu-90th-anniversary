@@ -88,4 +88,180 @@
 
 ---
 
+## 🗄️ CMS 콘텐츠 관리 규칙
+
+### 콘텐츠 관리 원칙
+
+**모든 하드코딩된 콘텐츠는 Firestore CMS로 관리됩니다.**
+
+메인 페이지의 **구조(Structure)**는 변경 금지이지만, **콘텐츠(Content)**는 CMS에서 관리합니다.
+
+### CMS로 관리되는 콘텐츠
+
+#### 1. HeroSection ✅ **[CMS 완료 - 2025-12-26]**
+- ✅ CMS 관리: 배경 이미지, 뱃지 텍스트, 타이틀, 부제목 (7개 필드)
+- ✅ 관리자 페이지: `/admin/content/hero`
+- ✅ Firestore 연동 완료
+- ❌ 구조 변경 금지: 레이아웃, 애니메이션, 스타일
+
+#### 2. TimelineIntro ✅ **[CMS 완료 - 2025-12-26]**
+- ✅ CMS 관리: Dr. Rue 명언 (영문/한글), Attribution, 1936 텍스트, Title (6개 필드)
+- ✅ 관리자 페이지: `/admin/content/timeline-intro`
+- ✅ Firestore 연동 완료
+- ❌ 구조 변경 금지: 애니메이션 시퀀스, 시각 효과
+
+#### 3. HistoryStory 🔜 **[CMS 개발 대기]**
+- ✅ CMS 관리: Act별 이미지, 타이틀, 본문, 하이라이트
+- 🔜 관리자 페이지: `/admin/content/history-story` (개발 예정)
+- ❌ 구조 변경 금지: 4개 Act 구조, 스크롤 애니메이션
+
+#### 4. MarqueeSection ✅ **[CMS 완료 - 2025-12-26]**
+- ✅ CMS 관리: 움직이는 텍스트 × 2, 방향, 속도, 활성화 (10개 필드)
+- ✅ 관리자 페이지: `/admin/content/marquee`
+- ✅ Firestore 연동 완료
+- ❌ 구조 변경 금지: 마키 애니메이션 로직
+
+#### 5. PeriodSection × 6 ✅ **[CMS 완료 - 2025-12-26]**
+- ✅ CMS 관리: 6개 Period + 18개 Highlights (Subcollection)
+- ✅ 관리자 페이지: `/admin/content/periods`
+- ✅ Period 편집: `/admin/content/periods/[id]/edit`
+- ✅ Highlight 관리: `/admin/content/periods/[id]/highlights`
+- ✅ Firestore 연동 완료 (`src/app/page.tsx`)
+- ❌ 구조 변경 금지: 6개 섹션 구조, 레이아웃
+
+#### 6. Footer ✅ **[CMS 완료 - 2025-12-26]**
+- ✅ CMS 관리: 브랜드명, 슬로건, 소셜 링크, Quick Links, Contact, Legal (16개 필드)
+- ✅ 관리자 페이지: `/admin/content/footer`
+- ✅ Firestore 연동 완료
+- ❌ 구조 변경 금지: Footer 레이아웃
+
+### 📊 CMS 개발 현황 (2025-12-26 최종)
+
+**완료**: 5/6 모듈 (83%) ⭐
+- ✅ HeroSection CMS
+- ✅ Footer CMS
+- ✅ Marquee CMS
+- ✅ TimelineIntro CMS
+- ✅ Period & Highlights CMS (Subcollection 구조)
+
+**대기**: 1/6 모듈 (17%)
+- 🔜 HistoryStory CMS
+
+**총 관리 가능 필드**: 111개
+
+### Firestore Collections
+
+메인 페이지 콘텐츠는 다음 Collections에서 관리됩니다:
+
+```
+homepage_hero               // HeroSection 콘텐츠
+homepage_timeline_intro     // TimelineIntro 콘텐츠
+homepage_history_story      // HistoryStory Acts (5개 문서)
+homepage_marquee            // Marquee 텍스트 (2개)
+homepage_periods            // Period 데이터 (6개)
+  └─ highlights             // Subcollection (각 Period별)
+homepage_footer             // Footer 콘텐츠
+```
+
+### 관리자 페이지 경로
+
+콘텐츠 관리는 다음 관리자 페이지에서 수행합니다:
+
+```
+/admin/content/hero              # ✅ HeroSection 관리 (완료)
+/admin/content/timeline-intro    # ✅ TimelineIntro 관리 (완료)
+/admin/content/history-story     # 🔜 HistoryStory 관리 (개발 예정)
+/admin/content/marquee           # ✅ Marquee 관리 (완료)
+/admin/content/periods           # 🔜 Period 관리 (개발 예정)
+/admin/content/footer            # ✅ Footer 관리 (완료)
+/admin/content/history           # ✅ 별빛 아카이브 관리 (완료)
+```
+
+**완료된 관리자 페이지**: 8개
+- hero, timeline-intro, marquee, footer, history
+- periods (목록), periods/[id]/edit (편집), periods/[id]/highlights (Highlight 관리)
+
+**개발 대기 중**: 1개 (history-story)
+
+### CMS 개발 규칙
+
+#### ✅ 허용되는 작업
+
+1. **관리자 페이지 개발**
+   - CRUD 기능 구현
+   - 이미지 업로드 기능
+   - 텍스트 편집 기능
+   - 순서 변경 기능
+
+2. **Firestore 연동**
+   - Collection 생성
+   - CRUD 함수 작성
+   - Security Rules 설정
+   - 초기 데이터 마이그레이션
+
+3. **메인 페이지 데이터 연동**
+   - Firestore에서 데이터 로드
+   - Fallback 데이터 제공
+   - 로딩 상태 처리
+
+#### ❌ 금지되는 작업
+
+1. **구조 변경**
+   - 컴포넌트 순서 변경
+   - 레이아웃 수정
+   - 애니메이션 로직 변경 (콘텐츠 변경은 OK)
+
+2. **하드코딩 유지**
+   - 새로운 콘텐츠를 하드코딩으로 추가
+   - CMS를 우회하여 직접 수정
+
+### Fallback 전략
+
+모든 CMS 콘텐츠는 **Fallback 데이터**를 제공해야 합니다:
+
+```typescript
+// 예시: HeroSection
+const fallbackHero = {
+  backgroundImage: '...',
+  badgeText: 'THE 90TH ANNIVERSARY',
+  mainTitle: '90',
+  mainSubtitle: 'YEARS OF HISTORY',
+  subtitle: '1936 - 2026'
+};
+
+// Firestore 오류 시 Fallback 사용
+const data = await getHeroContent() || fallbackHero;
+```
+
+### 초기 데이터 마이그레이션
+
+하드코딩된 데이터를 Firestore로 이전하는 마이그레이션 스크립트를 제공합니다:
+
+```bash
+# ✅ 완료된 마이그레이션 스크립트
+npm run migrate:hero              # ✅ HeroSection 마이그레이션 (완료)
+npm run migrate:footer            # ✅ Footer 마이그레이션 (완료)
+npm run migrate:marquee           # ✅ Marquee 마이그레이션 (완료)
+npm run migrate:timeline-intro    # ✅ TimelineIntro 마이그레이션 (완료)
+
+# ✅ 완료된 마이그레이션 스크립트 (추가)
+npm run migrate:periods           # ✅ Periods & Highlights 마이그레이션 (완료)
+
+# 🔜 개발 예정 마이그레이션 스크립트
+npm run migrate:history-story     # 🔜 HistoryStory 마이그레이션 (개발 예정)
+
+# 통합 마이그레이션 (완료된 것만 실행)
+npm run migrate:all               # 현재: hero + footer + marquee + timeline-intro + periods
+```
+
+**주의**: `migrate:all`은 현재 완료된 5개 모듈을 마이그레이션합니다. HistoryStory는 CMS 개발 후 추가됩니다.
+
+### 참고 문서
+
+- **CMS 개발 계획**: `docs/CMS_Development_Plan.md`
+- **PRD**: `docs/PRD_SHU_90th_Anniversary.md`
+- **TRD**: `docs/TRD_SHU_90th_Anniversary.md`
+
+---
+
 **이 규칙은 프로젝트의 일관성과 원본 디자인 의도를 보호하기 위한 필수 규칙입니다.**

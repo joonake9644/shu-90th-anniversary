@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Period } from '../../data/timelineData';
+import type { Period } from '@/lib/firestore/admin/periods';
 
 interface TimelineProgressBarProps {
     periods: Period[];

@@ -1,23 +1,14 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SubPageLayout } from '@/components/layout/SubPageLayout';
 import { Play, Clock, Calendar } from 'lucide-react';
+import { getPublicVideos } from '@/lib/firestore/public/videos';
+import type { Video } from '@/lib/firestore/admin/videos';
 
-interface Video {
-  id: string;
-  title: string;
-  description: string;
-  year: string;
-  duration: string;
-  thumbnail: string;
-  category: string;
-  period: string;
-}
-
-// 임시 비디오 데이터 (실제로는 Firebase나 CMS에서 가져올 데이터)
-const videosData: Video[] = [
+// Fallback 비디오 데이터 (Firestore 오류 시 사용)
+const fallbackVideosData: Video[] = [
   {
     id: 'v1',
     title: '개교 기념식 - 1936년의 감동',
@@ -25,8 +16,12 @@ const videosData: Video[] = [
     year: '1936',
     duration: '5:32',
     thumbnail: 'https://images.unsplash.com/photo-1689858210110-03f1e91f8c69?w=800',
+    videoUrl: 'https://www.youtube.com/watch?v=example1',
     category: '기념식',
     period: '1936-1946',
+    order: 1,
+    featured: true,
+    enabled: true,
   },
   {
     id: 'v2',
@@ -35,8 +30,12 @@ const videosData: Video[] = [
     year: '1951',
     duration: '8:15',
     thumbnail: 'https://images.unsplash.com/photo-1533481498108-4b77f433501a?w=800',
+    videoUrl: 'https://www.youtube.com/watch?v=example2',
     category: '역사',
     period: '1947-1956',
+    order: 2,
+    featured: false,
+    enabled: true,
   },
   {
     id: 'v3',
@@ -45,8 +44,12 @@ const videosData: Video[] = [
     year: '1974',
     duration: '6:45',
     thumbnail: 'https://images.unsplash.com/photo-1676555263970-63e72d69642a?w=800',
+    videoUrl: 'https://www.youtube.com/watch?v=example3',
     category: '캠퍼스',
     period: '1957-1996',
+    order: 3,
+    featured: false,
+    enabled: true,
   },
   {
     id: 'v4',
@@ -55,8 +58,12 @@ const videosData: Video[] = [
     year: '1988',
     duration: '12:30',
     thumbnail: 'https://images.unsplash.com/photo-1758432274762-71b4c4572728?w=800',
+    videoUrl: 'https://www.youtube.com/watch?v=example4',
     category: '행사',
     period: '1957-1996',
+    order: 4,
+    featured: false,
+    enabled: true,
   },
   {
     id: 'v5',
@@ -65,8 +72,12 @@ const videosData: Video[] = [
     year: '2013',
     duration: '15:00',
     thumbnail: 'https://images.unsplash.com/photo-1710616836472-ff86042cd881?w=800',
+    videoUrl: 'https://www.youtube.com/watch?v=example5',
     category: '기념식',
     period: '1997-2016',
+    order: 5,
+    featured: false,
+    enabled: true,
   },
   {
     id: 'v6',
@@ -75,8 +86,12 @@ const videosData: Video[] = [
     year: '2023',
     duration: '7:20',
     thumbnail: 'https://images.unsplash.com/photo-1758270705172-07b53627dfcb?w=800',
+    videoUrl: 'https://www.youtube.com/watch?v=example6',
     category: '기술',
     period: '2017-2024',
+    order: 6,
+    featured: false,
+    enabled: true,
   },
   {
     id: 'v7',
@@ -85,8 +100,12 @@ const videosData: Video[] = [
     year: '2026',
     duration: '4:50',
     thumbnail: 'https://images.unsplash.com/photo-1591218214141-45545921d2d9?w=800',
+    videoUrl: 'https://www.youtube.com/watch?v=example7',
     category: '기념식',
     period: '2025-Beyond',
+    order: 7,
+    featured: false,
+    enabled: true,
   },
   {
     id: 'v8',
@@ -95,8 +114,12 @@ const videosData: Video[] = [
     year: '2026',
     duration: '18:45',
     thumbnail: 'https://images.unsplash.com/photo-1560220604-1985ebfe28b1?w=800',
+    videoUrl: 'https://www.youtube.com/watch?v=example8',
     category: '인터뷰',
     period: '2025-Beyond',
+    order: 8,
+    featured: false,
+    enabled: true,
   },
 ];
 
@@ -113,12 +136,33 @@ const periods = [
 export default function VideoHistoryPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<string>('all');
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [videosData, setVideosData] = useState<Video[]>(fallbackVideosData);
+  const [loading, setLoading] = useState(true);
+
+  // Load videos from Firestore
+  useEffect(() => {
+    const loadVideos = async () => {
+      try {
+        const data = await getPublicVideos();
+        if (data && data.length > 0) {
+          setVideosData(data);
+        }
+      } catch (error) {
+        console.error('Error loading videos:', error);
+        // Use fallback data
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadVideos();
+  }, []);
 
   // Filter videos by period
   const filteredVideos = useMemo(() => {
     if (selectedPeriod === 'all') return videosData;
     return videosData.filter((video) => video.period === selectedPeriod);
-  }, [selectedPeriod]);
+  }, [selectedPeriod, videosData]);
 
   return (
     <SubPageLayout

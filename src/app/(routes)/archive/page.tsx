@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SubPageLayout } from '@/components/layout/SubPageLayout';
-import { timelineData } from '@/data/timelineData';
+import { getPublicPeriodsWithHighlights, type PeriodWithHighlights } from '@/lib/firestore/public/periods';
 import Image from 'next/image';
 import { X, ZoomIn, Download } from 'lucide-react';
 
@@ -20,12 +20,27 @@ interface ArchiveImage {
 export default function ArchivePage() {
   const [selectedPeriod, setSelectedPeriod] = useState<string>('all');
   const [lightboxImage, setLightboxImage] = useState<ArchiveImage | null>(null);
+  const [periodsData, setPeriodsData] = useState<PeriodWithHighlights[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Extract all images from timeline data
+  // Fetch periods and highlights from Firestore
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      const data = await getPublicPeriodsWithHighlights();
+      if (data) {
+        setPeriodsData(data);
+      }
+      setIsLoading(false);
+    }
+    fetchData();
+  }, []);
+
+  // Extract all images from periods data
   const allImages: ArchiveImage[] = useMemo(() => {
     const images: ArchiveImage[] = [];
 
-    timelineData.forEach((period) => {
+    periodsData.forEach((period) => {
       // Add hero image
       images.push({
         id: `${period.id}-hero`,
@@ -52,15 +67,15 @@ export default function ArchivePage() {
     });
 
     return images;
-  }, []);
+  }, [periodsData]);
 
   // Filter images by period
   const filteredImages = useMemo(() => {
     if (selectedPeriod === 'all') return allImages;
-    const period = timelineData.find((p) => p.id === selectedPeriod);
+    const period = periodsData.find((p) => p.id === selectedPeriod);
     if (!period) return allImages;
     return allImages.filter((img) => img.periodRange === period.rangeLabel);
-  }, [selectedPeriod, allImages]);
+  }, [selectedPeriod, allImages, periodsData]);
 
   return (
     <SubPageLayout
@@ -75,7 +90,7 @@ export default function ArchivePage() {
             onClick={() => setSelectedPeriod('all')}
             label="전체"
           />
-          {timelineData.map((period) => (
+          {periodsData.map((period) => (
             <FilterButton
               key={period.id}
               active={selectedPeriod === period.id}

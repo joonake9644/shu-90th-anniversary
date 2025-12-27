@@ -1,10 +1,100 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
+import { getPublicHistoryStoryActs } from '@/lib/firestore/public/historyStory';
+import type { HistoryStoryAct } from '@/lib/firestore/admin/historyStory';
+
+// Fallback 데이터 (Firestore 오류 시 사용)
+const fallbackActs: HistoryStoryAct[] = [
+    {
+        id: 'prologue',
+        actType: 'prologue',
+        order: 0,
+        prologueNarrative1: 'In the deepest darkness...',
+        prologueNarrative2: 'A light awakens',
+        prologueYear: '1936',
+        prologueYearSubtitle: 'The Spark of Compassion',
+        enabled: true,
+    },
+    {
+        id: 'act1',
+        actType: 'act1',
+        order: 1,
+        actImageUrl: 'https://images.unsplash.com/photo-1516570161687-0b1a7742d87a?q=80&w=1200&auto=format&fit=crop',
+        actTitleEn: 'ACT 1: HARDSHIP',
+        actTitleKr: '고난, 그 깊은 뿌리',
+        actDescription: '전쟁과 폐허 속에서도 꺼지지 않았던 등불.\n류제한 박사의 천막 병원은 절망을 희망으로 바꾸는\n거룩한 성소였습니다.',
+        act1PeriodLabel: '1936 - 1953 · The Era of Endurance',
+        act1BackgroundText: 'ROOTS',
+        enabled: true,
+    },
+    {
+        id: 'act2',
+        actType: 'act2',
+        order: 2,
+        actTitleEn: 'ACT 2: FOREST OF TRUTH',
+        actTitleKr: '진리의 숲을 이루다',
+        actDescription: '한 그루의 나무가 숲이 되기까지,\n우리는 멈추지 않고 자라났습니다.',
+        act2YearLabels: ['Year 1960', 'Year 1970', 'Year 1980', 'Year 1990'],
+        act2BackgroundColor: '#1a1815',
+        enabled: true,
+    },
+    {
+        id: 'act3',
+        actType: 'act3',
+        order: 3,
+        actTitleEn: 'ACT 3: PRISM OF LOVE',
+        actTitleKr: '세상으로 번지는\n사랑의 빛',
+        act3BadgeText: 'Global Impact',
+        act3MapLabel: 'Connecting The World',
+        enabled: true,
+    },
+    {
+        id: 'epilogue',
+        actType: 'epilogue',
+        order: 4,
+        epilogueSubtitleEn: 'Our Promise',
+        epilogueTitleKr: '100년을 향한 약속',
+        epilogueDescription: '지난 90년의 역사가 그러했듯,\n앞으로의 100년도 변함없는 사랑으로\n세상을 비추겠습니다.',
+        epilogueButtonText: 'Join the Journey',
+        enabled: true,
+    },
+];
 
 export default function HistoryStory() {
+    const [acts, setActs] = useState<HistoryStoryAct[]>(fallbackActs);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadActs = async () => {
+            try {
+                const data = await getPublicHistoryStoryActs();
+                if (data && data.length > 0) {
+                    setActs(data);
+                }
+            } catch (error) {
+                console.error('Error loading history story acts:', error);
+                // Fallback 사용
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadActs();
+    }, []);
+
+    // Acts를 타입별로 찾기 (Helper 함수)
+    const getAct = (actType: string): HistoryStoryAct | undefined => {
+        return acts.find(act => act.actType === actType);
+    };
+
+    const prologue = getAct('prologue');
+    const act1 = getAct('act1');
+    const act2 = getAct('act2');
+    const act3 = getAct('act3');
+    const epilogue = getAct('epilogue');
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Overall scroll progress for the story container
@@ -92,7 +182,7 @@ export default function HistoryStory() {
                         className="absolute top-[40%] text-center z-10"
                     >
                         <p className="text-white/40 font-serif italic text-lg tracking-widest">
-                            In the deepest darkness...
+                            {prologue?.prologueNarrative1 || 'In the deepest darkness...'}
                         </p>
                     </motion.div>
 
@@ -102,7 +192,7 @@ export default function HistoryStory() {
                         className="absolute top-[40%] text-center z-10"
                     >
                         <p className="text-amber-100/60 font-serif italic text-lg tracking-widest">
-                            A light awakens
+                            {prologue?.prologueNarrative2 || 'A light awakens'}
                         </p>
                     </motion.div>
 
@@ -121,13 +211,13 @@ export default function HistoryStory() {
                         style={{ scale: text1936Scale, opacity: text1936Opacity }}
                         className="absolute text-8xl md:text-[12rem] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-t from-white to-amber-100 drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] z-30"
                     >
-                        1936
+                        {prologue?.prologueYear || '1936'}
                     </motion.h1>
                     <motion.p
                         style={{ opacity: text1936Opacity }}
                         className="absolute top-[65%] text-amber-100/60 font-serif tracking-widest uppercase text-sm"
                     >
-                        The Spark of Compassion
+                        {prologue?.prologueYearSubtitle || 'The Spark of Compassion'}
                     </motion.p>
                 </motion.div>
 
@@ -142,7 +232,7 @@ export default function HistoryStory() {
                             <motion.div style={{ x: act1X }} className="relative">
                                 <div className="relative aspect-[4/5] bg-gray-800 overflow-hidden grayscale contrast-125 rounded-sm border border-white/10 shadow-2xl">
                                     <Image
-                                        src="https://images.unsplash.com/photo-1516570161687-0b1a7742d87a?q=80&w=1200&auto=format&fit=crop"
+                                        src={act1?.actImageUrl || 'https://images.unsplash.com/photo-1516570161687-0b1a7742d87a?q=80&w=1200&auto=format&fit=crop'}
                                         alt="Hardship"
                                         fill
                                         className="object-cover opacity-60"
@@ -151,22 +241,20 @@ export default function HistoryStory() {
                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-amber-500/20 rounded-full blur-[40px] mix-blend-color-dodge"></div>
                                 </div>
                                 <div className="absolute -bottom-8 -right-8 text-9xl font-bold text-white/5 z-0 select-none">
-                                    ROOTS
+                                    {act1?.act1BackgroundText || 'ROOTS'}
                                 </div>
                             </motion.div>
 
                             <div className="z-10 space-y-6 text-left">
-                                <h2 className="text-4xl md:text-6xl font-bold font-serif leading-tight">
-                                    <span className="text-amber-500/80">고난</span>, 그 깊은 뿌리
+                                <h2 className="text-4xl md:text-6xl font-bold font-serif leading-tight whitespace-pre-line">
+                                    {act1?.actTitleKr || '고난, 그 깊은 뿌리'}
                                 </h2>
-                                <p className="text-lg md:text-xl text-white/70 leading-relaxed font-light">
-                                    전쟁과 폐허 속에서도 꺼지지 않았던 등불.<br />
-                                    류제한 박사의 천막 병원은 절망을 희망으로 바꾸는<br />
-                                    거룩한 성소였습니다.
+                                <p className="text-lg md:text-xl text-white/70 leading-relaxed font-light whitespace-pre-line">
+                                    {act1?.actDescription || '전쟁과 폐허 속에서도 꺼지지 않았던 등불.\n류제한 박사의 천막 병원은 절망을 희망으로 바꾸는\n거룩한 성소였습니다.'}
                                 </p>
                                 <div className="w-12 h-[1px] bg-amber-500/50 my-8"></div>
                                 <p className="text-sm text-white/40 font-mono uppercase tracking-widest">
-                                    1936 - 1953 · The Era of Endurance
+                                    {act1?.act1PeriodLabel || '1936 - 1953 · The Era of Endurance'}
                                 </p>
                             </div>
                         </div>
@@ -174,7 +262,13 @@ export default function HistoryStory() {
                 </motion.div>
 
                 {/* ACT 2: FOREST OF TRUTH (Growth) */}
-                <motion.div style={{ opacity: act2Opacity }} className="absolute inset-0 z-30 bg-[#1a1815] flex items-center justify-center">
+                <motion.div
+                    style={{
+                        opacity: act2Opacity,
+                        backgroundColor: act2?.act2BackgroundColor || '#1a1815'
+                    }}
+                    className="absolute inset-0 z-30 flex items-center justify-center">
+
                     {/* SVG Growth Animation */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30" preserveAspectRatio="none">
                         <motion.path
@@ -201,19 +295,18 @@ export default function HistoryStory() {
                     </svg>
 
                     <div className="relative z-10 text-center max-w-4xl px-6">
-                        <h2 className="text-5xl md:text-7xl font-bold text-[#d4cbb8] mb-8 font-serif">
-                            진리의 숲을 이루다
+                        <h2 className="text-5xl md:text-7xl font-bold text-[#d4cbb8] mb-8 font-serif whitespace-pre-line">
+                            {act2?.actTitleKr || '진리의 숲을 이루다'}
                         </h2>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 opacity-80">
-                            {[1, 2, 3, 4].map((i) => (
+                            {(act2?.act2YearLabels || ['Year 1960', 'Year 1970', 'Year 1980', 'Year 1990']).map((yearLabel, i) => (
                                 <div key={i} className="aspect-square bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm flex items-center justify-center group hover:bg-white/10 transition-colors">
-                                    <span className="text-2xl font-light text-white/30 group-hover:text-white/80 transition-colors">Year {1950 + (i * 10)}</span>
+                                    <span className="text-2xl font-light text-white/30 group-hover:text-white/80 transition-colors">{yearLabel}</span>
                                 </div>
                             ))}
                         </div>
-                        <p className="text-xl md:text-2xl text-[#d4cbb8]/70 mt-12 font-light font-serif">
-                            한 그루의 나무가 숲이 되기까지,<br />
-                            우리는 멈추지 않고 자라났습니다.
+                        <p className="text-xl md:text-2xl text-[#d4cbb8]/70 mt-12 font-light font-serif whitespace-pre-line">
+                            {act2?.actDescription || '한 그루의 나무가 숲이 되기까지,\n우리는 멈추지 않고 자라났습니다.'}
                         </p>
                     </div>
                 </motion.div>
@@ -229,17 +322,17 @@ export default function HistoryStory() {
                     <div className="relative z-10 w-full max-w-6xl px-6 flex flex-col items-center">
                         <div className="mb-12">
                             <span className="inline-block py-1 px-3 rounded-full border border-blue-400/30 text-blue-300 text-xs tracking-widest uppercase bg-blue-500/10 backdrop-blur-md">
-                                Global Impact
+                                {act3?.act3BadgeText || 'Global Impact'}
                             </span>
                         </div>
 
-                        <h2 className="text-5xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-white text-center leading-tight mb-8">
-                            세상으로 번지는<br />사랑의 빛
+                        <h2 className="text-5xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-white text-center leading-tight mb-8 whitespace-pre-line">
+                            {act3?.actTitleKr || '세상으로 번지는\n사랑의 빛'}
                         </h2>
 
                         {/* Simulated World Map Points */}
                         <div className="w-full h-64 md:h-96 relative border-t border-b border-white/10 mt-8 flex items-center justify-center">
-                            <p className="text-white/20 text-lg tracking-[1em] uppercase">Connecting The World</p>
+                            <p className="text-white/20 text-lg tracking-[1em] uppercase">{act3?.act3MapLabel || 'Connecting The World'}</p>
 
                             {/* Random light points */}
                             {worldPoints.map((point, i) => (
@@ -287,18 +380,16 @@ export default function HistoryStory() {
 
                     <div className="relative z-20 text-center">
                         <h3 className="text-2xl md:text-3xl text-white/60 font-light mb-4 tracking-widest uppercase">
-                            Our Promise
+                            {epilogue?.epilogueSubtitleEn || 'Our Promise'}
                         </h3>
                         <h1 className="text-5xl md:text-8xl font-bold text-white mb-8 tracking-tighter">
-                            100년을 향한 약속
+                            {epilogue?.epilogueTitleKr || '100년을 향한 약속'}
                         </h1>
-                        <p className="text-lg text-white/80 max-w-lg mx-auto leading-relaxed">
-                            지난 90년의 역사가 그러했듯,<br />
-                            앞으로의 100년도 변함없는 사랑으로<br />
-                            세상을 비추겠습니다.
+                        <p className="text-lg text-white/80 max-w-lg mx-auto leading-relaxed whitespace-pre-line">
+                            {epilogue?.epilogueDescription || '지난 90년의 역사가 그러했듯,\n앞으로의 100년도 변함없는 사랑으로\n세상을 비추겠습니다.'}
                         </p>
                         <button className="mt-12 px-8 py-4 bg-white text-black text-sm font-bold tracking-widest hover:bg-white/90 transition-colors uppercase">
-                            Join the Journey
+                            {epilogue?.epilogueButtonText || 'Join the Journey'}
                         </button>
                     </div>
                 </motion.div>

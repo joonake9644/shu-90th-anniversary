@@ -1,11 +1,40 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from 'next/image';
+import { getPublicTimelineIntroContent } from '@/lib/firestore/public/timelineIntro';
+import type { TimelineIntroContent } from '@/lib/firestore/admin/timelineIntro';
+
+// Fallback 데이터
+const fallbackContent: TimelineIntroContent = {
+  id: 'main',
+  year1936Text: '1936',
+  quoteEnglish: 'I never treated anyone with neglect.\nWhether treating Dr. Syngman Rhee or a country woman,\nI always gave my utmost effort.',
+  quoteKorean: '나는 어느 누구도 소홀히 치료하지 않았습니다.\n이승만 박사를 치료할 때나 시골의 아낙네를 치료할 때나\n똑같이 나의 최선의 노력을 바쳤습니다.',
+  attribution: 'George Henry Rue. M.D (고 류제한 박사 1899-1993)',
+  titleLeft: 'History',
+  titleRight: '90 Years'
+};
 
 export function TimelineIntro() {
     const containerRef = useRef<HTMLDivElement>(null);
+    const [content, setContent] = useState<TimelineIntroContent>(fallbackContent);
+
+    // Firestore에서 콘텐츠 로드
+    useEffect(() => {
+        const loadContent = async () => {
+            try {
+                const data = await getPublicTimelineIntroContent();
+                if (data) {
+                    setContent(data);
+                }
+            } catch (error) {
+                console.error('Error loading timeline intro:', error);
+            }
+        };
+        loadContent();
+    }, []);
 
     const { scrollYProgress } = useScroll({
         target: containerRef, // Fixed: use target for window scroll tracking
@@ -152,7 +181,7 @@ export function TimelineIntro() {
                         style={{ opacity: text1936Opacity, scale: text1936Scale, filter: text1936Blur }}
                         className="absolute top-[50%] -translate-y-1/2 text-7xl md:text-9xl font-bold tracking-[0.1em] text-white drop-shadow-[0_0_50px_rgba(255,255,255,1)] mix-blend-screen"
                     >
-                        1936
+                        {content.year1936Text}
                     </motion.div>
                 </div>
 
@@ -167,21 +196,27 @@ export function TimelineIntro() {
                 >
                     {/* English Quote - Cursive Style */}
                     <h4 className="text-3xl md:text-5xl font-pinyon text-white/95 mb-10 leading-relaxed drop-shadow-[0_0_30px_rgba(255,255,255,0.8)]">
-                        &quot;I never treated anyone with neglect.<br className="hidden md:block" />
-                        Whether treating Dr. Syngman Rhee or a country woman,<br className="hidden md:block" />
-                        I always gave my utmost effort.&quot;
+                        &quot;{content.quoteEnglish.split('\n').map((line, i, arr) => (
+                            <React.Fragment key={i}>
+                                {line}
+                                {i < arr.length - 1 && <br className="hidden md:block" />}
+                            </React.Fragment>
+                        ))}&quot;
                     </h4>
 
                     {/* Korean Translation */}
                     <p className="text-xl md:text-2xl font-light text-white/90 mb-8 font-serif leading-relaxed drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]">
-                        &quot;나는 어느 누구도 소홀히 치료하지 않았습니다.<br className="hidden md:block" />
-                        이승만 박사를 치료할 때나 시골의 아낙네를 치료할 때나<br className="hidden md:block" />
-                        똑같이 나의 최선의 노력을 바쳤습니다.&quot;
+                        &quot;{content.quoteKorean.split('\n').map((line, i, arr) => (
+                            <React.Fragment key={i}>
+                                {line}
+                                {i < arr.length - 1 && <br className="hidden md:block" />}
+                            </React.Fragment>
+                        ))}&quot;
                     </p>
 
                     {/* Attribution */}
                     <p className="text-sm md:text-base text-white/70 uppercase tracking-[0.2em] border-t border-white/40 inline-block pt-4 mt-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">
-                        George Henry Rue. M.D (고 류제한 박사 1899-1993)
+                        {content.attribution}
                     </p>
                 </motion.div>
 
@@ -191,11 +226,11 @@ export function TimelineIntro() {
                     className="relative z-20 flex flex-col md:flex-row items-center justify-center text-center mix-blend-difference"
                 >
                     <h3 className="text-3xl md:text-5xl font-light tracking-[0.2em] uppercase text-white">
-                        History
+                        {content.titleLeft}
                     </h3>
                     <span className="hidden md:block w-2 h-2 rounded-full bg-white/50 mx-4" />
                     <h3 className="text-3xl md:text-5xl font-bold tracking-widest text-white">
-                        90 Years
+                        {content.titleRight}
                     </h3>
                 </motion.div>
 

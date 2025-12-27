@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from "framer-motion";
 import { ArrowUpRight } from 'lucide-react';
 import Image from 'next/image';
-import { Highlight } from '../../data/timelineData';
+import type { Highlight } from '@/lib/firestore/admin/highlights';
 
 interface HighlightCardProps {
   highlight: Highlight;

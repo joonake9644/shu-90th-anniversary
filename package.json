@@ -6,7 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "migrate:hero": "node scripts/migrate-hero.js",
+    "migrate:footer": "node scripts/migrate-footer.js",
+    "migrate:marquee": "node scripts/migrate-marquee.js",
+    "migrate:timeline-intro": "node scripts/migrate-timeline-intro.js",
+    "migrate:periods": "node scripts/migrate-periods.js",
+    "migrate:history-story": "node scripts/migrate-history-story.js",
+    "migrate:videos": "node scripts/migrate-videos.js",
+    "migrate:all": "node scripts/migrate-hero.js && node scripts/migrate-footer.js && node scripts/migrate-marquee.js && node scripts/migrate-timeline-intro.js && node scripts/migrate-periods.js && node scripts/migrate-history-story.js && node scripts/migrate-videos.js"
   },
   "dependencies": {
     "@studio-freight/lenis": "^1.0.42",
