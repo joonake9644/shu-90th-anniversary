@@ -110,12 +110,57 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
+          {/* 홈페이지 CMS */}
+          <div className="bg-gray-900 border border-white/10 rounded-lg p-6">
+            <h2 className="text-xl font-bold text-amber-500 mb-4">
+              홈페이지 CMS
+            </h2>
+            <div className="space-y-3">
+              <Link
+                href="/admin/content/hero"
+                className="block px-4 py-3 bg-black hover:bg-gray-800 border border-white/20 rounded-lg transition-colors"
+              >
+                Hero 섹션
+              </Link>
+              <Link
+                href="/admin/content/timeline-intro"
+                className="block px-4 py-3 bg-black hover:bg-gray-800 border border-white/20 rounded-lg transition-colors"
+              >
+                Timeline Intro
+              </Link>
+              <Link
+                href="/admin/content/marquee"
+                className="block px-4 py-3 bg-black hover:bg-gray-800 border border-white/20 rounded-lg transition-colors"
+              >
+                Marquee
+              </Link>
+              <Link
+                href="/admin/content/periods"
+                className="block px-4 py-3 bg-black hover:bg-gray-800 border border-white/20 rounded-lg transition-colors"
+              >
+                6단계 역사
+              </Link>
+              <Link
+                href="/admin/content/footer"
+                className="block px-4 py-3 bg-black hover:bg-gray-800 border border-white/20 rounded-lg transition-colors"
+              >
+                Footer
+              </Link>
+            </div>
+          </div>
+
           {/* 설정 */}
           <div className="bg-gray-900 border border-white/10 rounded-lg p-6">
             <h2 className="text-xl font-bold text-amber-500 mb-4">
               시스템
             </h2>
             <div className="space-y-3">
+              <Link
+                href="/admin/content/setup"
+                className="block px-4 py-3 bg-amber-500 hover:bg-amber-600 text-black font-bold border border-amber-500 rounded-lg transition-colors"
+              >
+                🎯 초기 데이터 설정
+              </Link>
               <Link
                 href={ADMIN_ROUTES.SETTINGS}
                 className="block px-4 py-3 bg-black hover:bg-gray-800 border border-white/20 rounded-lg transition-colors"
@@ -131,11 +176,17 @@ export default function AdminDashboardPage() {
           <h3 className="text-lg font-bold text-amber-500 mb-2">
             환영합니다!
           </h3>
-          <p className="text-gray-300">
+          <p className="text-gray-300 mb-4">
             SHU 90주년 기념 홈페이지 관리 시스템에 로그인하셨습니다.
             <br />
             위 메뉴를 통해 컨텐츠를 관리하실 수 있습니다.
           </p>
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded p-4 mt-4">
+            <p className="text-blue-400 font-bold mb-1">🆕 처음 사용하시나요?</p>
+            <p className="text-gray-300 text-sm">
+              "초기 데이터 설정" 버튼을 클릭하여 더미 데이터를 한 번에 생성하세요!
+            </p>
+          </div>
         </div>
       </main>
     </div>
