@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { ADMIN_ROUTES } from '@/lib/constants/routes';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 import {
   getVideoById,
   updateVideo,
@@ -258,30 +259,13 @@ export default function EditVideoPage() {
               <div className="bg-gray-900 border border-white/10 rounded-lg p-6">
                 <h2 className="text-xl font-bold text-white mb-6">미디어</h2>
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      썸네일 이미지 URL *
-                    </label>
-                    <input
-                      type="url"
-                      value={formData.thumbnail}
-                      onChange={(e) =>
-                        setFormData((prev) => ({ ...prev, thumbnail: e.target.value }))
-                      }
-                      className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      placeholder="https://images.unsplash.com/..."
-                      required
-                    />
-                    {formData.thumbnail && (
-                      <div className="mt-4">
-                        <img
-                          src={formData.thumbnail}
-                          alt="Preview"
-                          className="w-full h-48 object-cover rounded-lg"
-                        />
-                      </div>
-                    )}
-                  </div>
+                  <ImageUpload
+                    value={formData.thumbnail}
+                    onChange={(url) => setFormData((prev) => ({ ...prev, thumbnail: url }))}
+                    label="썸네일 이미지"
+                    path="videos"
+                    required
+                  />
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       비디오 URL * (YouTube 또는 비디오 파일)

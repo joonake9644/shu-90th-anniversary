@@ -95,6 +95,39 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
+          {/* 서브페이지 콘텐츠 관리 */}
+          <div className="bg-gray-900 border border-amber-500/30 rounded-lg p-6">
+            <h2 className="text-xl font-bold text-amber-500 mb-4">
+              서브페이지 콘텐츠
+            </h2>
+            <div className="space-y-3">
+              <Link
+                href="/admin/content/highlights"
+                className="block px-4 py-3 bg-black hover:bg-gray-800 border border-white/20 rounded-lg transition-colors"
+              >
+                명장면 90
+              </Link>
+              <Link
+                href="/admin/content/videos"
+                className="block px-4 py-3 bg-black hover:bg-gray-800 border border-white/20 rounded-lg transition-colors"
+              >
+                영상으로 보는 90
+              </Link>
+              <Link
+                href="/admin/content/statistics"
+                className="block px-4 py-3 bg-black hover:bg-gray-800 border border-white/20 rounded-lg transition-colors"
+              >
+                숫자로 보는 90
+              </Link>
+              <Link
+                href="/admin/content/history"
+                className="block px-4 py-3 bg-black hover:bg-gray-800 border border-white/20 rounded-lg transition-colors"
+              >
+                역사 갤러리
+              </Link>
+            </div>
+          </div>
+
           {/* 미디어 */}
           <div className="bg-gray-900 border border-white/10 rounded-lg p-6">
             <h2 className="text-xl font-bold text-amber-500 mb-4">

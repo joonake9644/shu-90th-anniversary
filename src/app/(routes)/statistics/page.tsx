@@ -4,8 +4,61 @@ import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { SubPageLayout } from '@/components/layout/SubPageLayout';
 import { useInView } from 'framer-motion';
+import { getPublicStatisticsData } from '@/lib/firestore/public/statistics';
+import type { StatisticsData } from '@/lib/firestore/admin/statistics';
+
+// Fallback 데이터
+const fallbackData: StatisticsData = {
+  stats: [
+    { id: 'years', number: 90, suffix: '년', label: 'Years of Excellence', description: '1936년부터 현재까지', order: 1, enabled: true },
+    { id: 'alumni', number: 50000, suffix: '+', label: 'Proud Alumni', description: '전 세계로 뻗어나간 동문', order: 2, enabled: true },
+    { id: 'partners', number: 120, suffix: '+', label: 'Global Partners', description: '협력 대학 및 기관', order: 3, enabled: true },
+    { id: 'services', number: 1500, suffix: '+', label: 'Community Services', description: '지역사회 의료 봉사', order: 4, enabled: true },
+  ],
+  milestones: [
+    { year: 1936, students: 30, label: '개교' },
+    { year: 1948, students: 100, label: '전문학교 승격' },
+    { year: 1979, students: 500, label: '전문대학 승격' },
+    { year: 1998, students: 1200, label: '종합 보건대학' },
+    { year: 2013, students: 3000, label: 'WCC 선정' },
+    { year: 2026, students: 4500, label: '90주년' },
+  ],
+  detailStats: [
+    { id: 'departments', number: 15, suffix: '개', label: '학과 및 전공', items: ['간호학과', '치위생과', '물리치료과', '방사선과', '임상병리과', '...외 10개'] },
+    { id: 'employment', number: 95, suffix: '%', label: '취업률', items: ['전문대학 최상위권', '보건 계열 1위', '산학협력 우수'] },
+    { id: 'countries', number: 20, suffix: '개국', label: '해외 교류국', items: ['미국', '일본', '중국', '필리핀', '태국', '...외 15개국'] },
+    { id: 'scholarship', number: 30, suffix: '억원', label: '연간 장학금', items: ['성적 우수 장학금', '생활비 지원', '해외 연수 지원'] },
+    { id: 'dormitory', number: 500, suffix: '석', label: '기숙사 수용 인원', items: ['최신 시설', '쾌적한 환경', '24시간 관리'] },
+    { id: 'partnerships', number: 100, suffix: '개', label: '산학협력 기업', items: ['대형 병원', '의료 기관', '연구소', '기업체'] },
+  ],
+  research: {
+    papers: 200,
+    projects: 50,
+    investment: 10,
+  },
+};
 
 export default function StatisticsPage() {
+  const [data, setData] = useState<StatisticsData>(fallbackData);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const result = await getPublicStatisticsData();
+        if (result) {
+          setData(result);
+        }
+      } catch (error) {
+        console.error('Error loading statistics:', error);
+        // fallback 데이터 사용
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
   return (
     <SubPageLayout
       title="숫자로 보는 90년"
@@ -13,32 +66,21 @@ export default function StatisticsPage() {
     >
       {/* Hero Stats */}
       <section className="mb-32">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <BigStatCard
-            number={90}
-            suffix="년"
-            label="Years of Excellence"
-            description="1936년부터 현재까지"
-          />
-          <BigStatCard
-            number={50000}
-            suffix="+"
-            label="Proud Alumni"
-            description="전 세계로 뻗어나간 동문"
-          />
-          <BigStatCard
-            number={120}
-            suffix="+"
-            label="Global Partners"
-            description="협력 대학 및 기관"
-          />
-          <BigStatCard
-            number={1500}
-            suffix="+"
-            label="Community Services"
-            description="지역사회 의료 봉사"
-          />
-        </div>
+        {loading ? (
+          <div className="text-center text-gray-400">로딩 중...</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {data.stats.map((stat) => (
+              <BigStatCard
+                key={stat.id}
+                number={stat.number}
+                suffix={stat.suffix}
+                label={stat.label}
+                description={stat.description}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Timeline Growth */}
@@ -77,42 +119,15 @@ export default function StatisticsPage() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <StatDetailCard
-            number={15}
-            suffix="개"
-            label="학과 및 전공"
-            items={['간호학과', '치위생과', '물리치료과', '방사선과', '임상병리과', '...외 10개']}
-          />
-          <StatDetailCard
-            number={95}
-            suffix="%"
-            label="취업률"
-            items={['전문대학 최상위권', '보건 계열 1위', '산학협력 우수']}
-          />
-          <StatDetailCard
-            number={20}
-            suffix="개국"
-            label="해외 교류국"
-            items={['미국', '일본', '중국', '필리핀', '태국', '...외 15개국']}
-          />
-          <StatDetailCard
-            number={30}
-            suffix="억원"
-            label="연간 장학금"
-            items={['성적 우수 장학금', '생활비 지원', '해외 연수 지원']}
-          />
-          <StatDetailCard
-            number={500}
-            suffix="석"
-            label="기숙사 수용 인원"
-            items={['최신 시설', '쾌적한 환경', '24시간 관리']}
-          />
-          <StatDetailCard
-            number={100}
-            suffix="개"
-            label="산학협력 기업"
-            items={['대형 병원', '의료 기관', '연구소', '기업체']}
-          />
+          {data.detailStats.map((stat) => (
+            <StatDetailCard
+              key={stat.id}
+              number={stat.number}
+              suffix={stat.suffix}
+              label={stat.label}
+              items={stat.items}
+            />
+          ))}
         </div>
       </section>
 
@@ -121,15 +136,15 @@ export default function StatisticsPage() {
         <div className="bg-white/5 rounded-2xl p-12 border border-white/10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div className="text-center">
-              <AnimatedNumber value={200} suffix="+" className="text-5xl font-bold text-amber-500 mb-4" />
+              <AnimatedNumber value={data.research.papers} suffix="+" className="text-5xl font-bold text-amber-500 mb-4" />
               <p className="text-gray-400">연간 연구 논문</p>
             </div>
             <div className="text-center">
-              <AnimatedNumber value={50} suffix="개" className="text-5xl font-bold text-amber-500 mb-4" />
+              <AnimatedNumber value={data.research.projects} suffix="개" className="text-5xl font-bold text-amber-500 mb-4" />
               <p className="text-gray-400">진행 중인 연구 프로젝트</p>
             </div>
             <div className="text-center">
-              <AnimatedNumber value={10} suffix="억원" className="text-5xl font-bold text-amber-500 mb-4" />
+              <AnimatedNumber value={data.research.investment} suffix="억원" className="text-5xl font-bold text-amber-500 mb-4" />
               <p className="text-gray-400">연구 개발 투자</p>
             </div>
           </div>
@@ -222,14 +237,17 @@ function BigStatCard({
 
 // Timeline Growth Visualization
 function TimelineGrowth() {
-  const milestones = [
-    { year: 1936, students: 30, label: '개교' },
-    { year: 1948, students: 100, label: '전문학교 승격' },
-    { year: 1979, students: 500, label: '전문대학 승격' },
-    { year: 1998, students: 1200, label: '종합 보건대학' },
-    { year: 2013, students: 3000, label: 'WCC 선정' },
-    { year: 2026, students: 4500, label: '90주년' },
-  ];
+  const [milestones, setMilestones] = useState(fallbackData.milestones);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const result = await getPublicStatisticsData();
+      if (result) {
+        setMilestones(result.milestones);
+      }
+    };
+    loadData();
+  }, []);
 
   return (
     <div className="relative">

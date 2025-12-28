@@ -37,14 +37,16 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { HeroSection } from '@/components/sections/HeroSection';
 import { TimelineIntro } from '@/components/sections/TimelineIntro';
-import HistoryStory from '@/components/sections/HistoryStory';
 import { MarqueeSection } from '@/components/sections/MarqueeSection';
 import { PeriodSection } from '@/components/sections/PeriodSection';
 import { TimelineProgressBar } from '@/components/layout/TimelineProgressBar';
 import { Footer } from '@/components/layout/Footer';
+
+// HistoryStory를 Lazy Loading으로 최적화
+const HistoryStory = lazy(() => import('@/components/sections/HistoryStory'));
 import { getPublicMarqueeTexts } from '@/lib/firestore/public/marquee';
 import type { MarqueeText } from '@/lib/firestore/admin/marquee';
 import { getPublicPeriodsWithHighlights } from '@/lib/firestore/public/periods';
@@ -129,7 +131,13 @@ export default function Home() {
             <TimelineIntro />
 
             {/* The Scrollytelling Story (High-level narrative) */}
-            <HistoryStory />
+            <Suspense fallback={
+                <div className="min-h-screen bg-black flex items-center justify-center">
+                    <div className="text-amber-500 text-xl">90년의 이야기를 불러오는 중...</div>
+                </div>
+            }>
+                <HistoryStory />
+            </Suspense>
 
             {/* Divider - Marquee 1 */}
             {marquees[0] && marquees[0].enabled && (

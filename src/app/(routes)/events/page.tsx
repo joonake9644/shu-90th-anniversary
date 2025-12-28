@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SubPageLayout } from '@/components/layout/SubPageLayout';
 import { Calendar, MapPin, Clock, Users } from 'lucide-react';
+import { getPublicEvents } from '@/lib/firestore/public/events';
+import type { Event as FirestoreEvent } from '@/types/firestore';
+import { Timestamp } from 'firebase/firestore';
 
-interface Event {
+interface EventDisplay {
   id: string;
   title: string;
   description: string;
@@ -18,57 +21,56 @@ interface Event {
   isFeatured?: boolean;
 }
 
-// 임시 이벤트 데이터
-const eventsData: Event[] = [
-  {
-    id: 'e1',
-    title: '90주년 기념 대축제',
-    description: '90년의 역사를 축하하는 대규모 기념행사. 동문, 재학생, 교직원이 함께하는 특별한 순간',
-    date: '2026-03-15',
-    time: '14:00 - 18:00',
-    location: '대강당',
-    category: '기념식',
-    attendees: '2000+',
-    image: 'https://images.unsplash.com/photo-1591218214141-45545921d2d9?w=800',
-    isFeatured: true,
-  },
-  {
-    id: 'e2',
-    title: '글로벌 의료 컨퍼런스',
-    description: '세계 유수 대학과 함께하는 국제 의료 학술 교류',
-    date: '2026-05-02',
-    time: '09:00 - 17:00',
-    location: '과학관',
-    category: '학술',
-    attendees: '500+',
-    image: 'https://images.unsplash.com/photo-1560220604-1985ebfe28b1?w=800',
-  },
-  {
-    id: 'e3',
-    title: '동문 홈커밍데이',
-    description: '선후배가 만나는 감동의 재회, 추억을 나누는 특별한 하루',
-    date: '2026-08-20',
-    time: '10:00 - 22:00',
-    location: '캠퍼스 그린',
-    category: '행사',
-    attendees: '1500+',
-    image: 'https://images.unsplash.com/photo-1758432274762-71b4c4572728?w=800',
-  },
-  {
-    id: 'e4',
-    title: 'Vision 2030 선포식',
-    description: '100주년을 향한 새로운 비전과 전략 발표',
-    date: '2026-10-10',
-    time: '15:00 - 17:00',
-    location: '그랜드홀',
-    category: '기념식',
-    attendees: '1000+',
-    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800',
-  },
-];
+const categoryLabels: Record<string, string> = {
+  'ceremony': '기념식',
+  'exhibition': '전시',
+  'conference': '학술',
+  'other': '기타',
+};
+
+// Helper: Firestore Event → Display Event
+function convertEvent(event: FirestoreEvent): EventDisplay {
+  const eventDate = event.date instanceof Timestamp ? event.date.toDate() : new Date();
+
+  return {
+    id: event.id,
+    title: event.title,
+    description: event.description,
+    date: eventDate.toISOString().split('T')[0],
+    time: eventDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }),
+    location: event.location,
+    category: event.category,
+    attendees: '참석 예정',
+    image: event.image || 'https://images.unsplash.com/photo-1591218214141-45545921d2d9?w=800',
+    isFeatured: false,
+  };
+}
 
 export default function EventsPage() {
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventDisplay | null>(null);
+  const [eventsData, setEventsData] = useState<EventDisplay[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load events from Firestore
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        const data = await getPublicEvents();
+        const displayData = data.map(convertEvent);
+        // Set first event as featured
+        if (displayData.length > 0) {
+          displayData[0].isFeatured = true;
+        }
+        setEventsData(displayData);
+      } catch (error) {
+        console.error('Error loading events:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEvents();
+  }, []);
 
   const featuredEvent = eventsData.find((e) => e.isFeatured);
   const upcomingEvents = eventsData.filter((e) => !e.isFeatured);
@@ -78,78 +80,98 @@ export default function EventsPage() {
       title="90주년 기념사업"
       subtitle="함께 만들어가는 90주년 축제. Celebrating 90 years together."
     >
-      {/* Featured Event */}
-      {featuredEvent && (
-        <section className="mb-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative bg-white/5 rounded-2xl overflow-hidden border border-white/10 group cursor-pointer"
-            onClick={() => setSelectedEvent(featuredEvent)}
-          >
-            {/* Background Image */}
-            <div
-              className="absolute inset-0 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700"
-              style={{ backgroundImage: `url(${featuredEvent.image})` }}
-            />
-
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/30" />
-
-            {/* Content */}
-            <div className="relative z-10 p-12 min-h-[500px] flex flex-col justify-end">
-              <div className="inline-block bg-amber-500/90 px-4 py-1.5 rounded-full mb-4 w-fit">
-                <span className="text-black font-bold text-sm uppercase">Featured Event</span>
-              </div>
-
-              <h2 className="text-4xl md:text-6xl font-bold text-white mb-4">
-                {featuredEvent.title}
-              </h2>
-
-              <p className="text-gray-300 text-lg mb-8 max-w-2xl">
-                {featuredEvent.description}
-              </p>
-
-              <div className="flex flex-wrap gap-6 text-white">
-                <div className="flex items-center gap-2">
-                  <Calendar size={20} className="text-amber-500" />
-                  <span>{new Date(featuredEvent.date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock size={20} className="text-amber-500" />
-                  <span>{featuredEvent.time}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin size={20} className="text-amber-500" />
-                  <span>{featuredEvent.location}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users size={20} className="text-amber-500" />
-                  <span>{featuredEvent.attendees} 참석 예정</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </section>
+      {/* Loading State */}
+      {loading && (
+        <div className="text-center py-20">
+          <p className="text-gray-500 text-lg">이벤트를 불러오는 중...</p>
+        </div>
       )}
 
-      {/* Upcoming Events */}
-      <section className="mb-20">
-        <h2 className="text-3xl font-bold text-white mb-8">다가오는 행사</h2>
+      {!loading && (
+        <>
+          {/* Featured Event */}
+          {featuredEvent && (
+            <section className="mb-20">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative bg-white/5 rounded-2xl overflow-hidden border border-white/10 group cursor-pointer"
+                onClick={() => setSelectedEvent(featuredEvent)}
+              >
+                {/* Background Image */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700"
+                  style={{ backgroundImage: `url(${featuredEvent.image})` }}
+                />
 
-        <div className="space-y-4">
-          <AnimatePresence>
-            {upcomingEvents.map((event, index) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                index={index}
-                onClick={() => setSelectedEvent(event)}
-              />
-            ))}
-          </AnimatePresence>
-        </div>
-      </section>
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/30" />
+
+                {/* Content */}
+                <div className="relative z-10 p-12 min-h-[500px] flex flex-col justify-end">
+                  <div className="inline-block bg-amber-500/90 px-4 py-1.5 rounded-full mb-4 w-fit">
+                    <span className="text-black font-bold text-sm uppercase">Featured Event</span>
+                  </div>
+
+                  <h2 className="text-4xl md:text-6xl font-bold text-white mb-4">
+                    {featuredEvent.title}
+                  </h2>
+
+                  <p className="text-gray-300 text-lg mb-8 max-w-2xl">
+                    {featuredEvent.description}
+                  </p>
+
+                  <div className="flex flex-wrap gap-6 text-white">
+                    <div className="flex items-center gap-2">
+                      <Calendar size={20} className="text-amber-500" />
+                      <span>{new Date(featuredEvent.date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock size={20} className="text-amber-500" />
+                      <span>{featuredEvent.time}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin size={20} className="text-amber-500" />
+                      <span>{featuredEvent.location}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users size={20} className="text-amber-500" />
+                      <span>{featuredEvent.attendees}</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </section>
+          )}
+
+          {/* Upcoming Events */}
+          {upcomingEvents.length > 0 && (
+            <section className="mb-20">
+              <h2 className="text-3xl font-bold text-white mb-8">다가오는 행사</h2>
+
+              <div className="space-y-4">
+                <AnimatePresence>
+                  {upcomingEvents.map((event, index) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      index={index}
+                      onClick={() => setSelectedEvent(event)}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
+            </section>
+          )}
+
+          {/* Empty State */}
+          {eventsData.length === 0 && (
+            <div className="text-center py-20">
+              <p className="text-gray-500 text-lg">등록된 이벤트가 없습니다.</p>
+            </div>
+          )}
+        </>
+      )}
 
       {/* Event Details Modal */}
       <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
@@ -180,7 +202,7 @@ function EventCard({
   index,
   onClick,
 }: {
-  event: Event;
+  event: EventDisplay;
   index: number;
   onClick: () => void;
 }) {
@@ -205,7 +227,7 @@ function EventCard({
       {/* Content */}
       <div className="flex-1">
         <div className="inline-block bg-white/10 text-white/80 px-3 py-1 rounded-full text-xs font-medium mb-2">
-          {event.category}
+          {categoryLabels[event.category] || event.category}
         </div>
         <h3 className="text-xl font-bold text-white mb-2 group-hover:text-amber-500 transition-colors">
           {event.title}
@@ -238,7 +260,7 @@ function EventModal({
   event,
   onClose,
 }: {
-  event: Event | null;
+  event: EventDisplay | null;
   onClose: () => void;
 }) {
   if (!event) return null;
@@ -268,7 +290,7 @@ function EventModal({
           {/* Content */}
           <div className="p-8">
             <div className="inline-block bg-amber-500/90 px-4 py-1.5 rounded-full mb-4">
-              <span className="text-black font-bold text-sm">{event.category}</span>
+              <span className="text-black font-bold text-sm">{categoryLabels[event.category] || event.category}</span>
             </div>
 
             <h2 className="text-3xl font-bold text-white mb-4">{event.title}</h2>

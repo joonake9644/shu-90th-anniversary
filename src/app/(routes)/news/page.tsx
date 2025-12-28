@@ -1,13 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SubPageLayout } from '@/components/layout/SubPageLayout';
 import { Calendar, ArrowRight, Tag } from 'lucide-react';
 import Image from 'next/image';
 import { subscribeNewsletter } from '@/lib/firestore/newsletter';
+import { getPublicNews } from '@/lib/firestore/public/news';
+import type { NewsArticle as FirestoreNewsArticle } from '@/types/firestore';
+import { Timestamp } from 'firebase/firestore';
 
-interface NewsArticle {
+interface NewsArticleDisplay {
   id: string;
   title: string;
   excerpt: string;
@@ -18,75 +21,37 @@ interface NewsArticle {
   author: string;
 }
 
-// 임시 뉴스 데이터
-const newsData: NewsArticle[] = [
-  {
-    id: 'n1',
-    title: '90주년 기념 의료 연구센터 착공식 개최',
-    excerpt: '미래 의료 과학의 중심이 될 최첨단 연구 시설 건립 시작',
-    content: '삼육보건대학교는 90주년을 기념하여 총 500억원 규모의 의료 연구센터 착공식을 가졌습니다. 이 시설은 2027년 완공 예정이며, 첨단 의료 기기와 연구 장비를 갖추게 됩니다.',
-    date: '2025-12-15',
-    category: '시설',
-    image: 'https://images.unsplash.com/photo-1689459448455-928ff1f65621?w=800',
-    author: '홍보팀',
-  },
-  {
-    id: 'n2',
-    title: '글로벌 의료 교육 협력 MOU 체결',
-    excerpt: '미국 하버드 의대와 공동 연구 및 교류 프로그램 시작',
-    content: '세계 최고 수준의 의료 교육 기관들과의 협력을 통해 우리 대학의 글로벌 경쟁력을 더욱 강화하게 되었습니다.',
-    date: '2025-12-10',
-    category: '협약',
-    image: 'https://images.unsplash.com/photo-1560220604-1985ebfe28b1?w=800',
-    author: '국제교류팀',
-  },
-  {
-    id: 'n3',
-    title: 'WCC 재선정, 세계적 수준 유지',
-    excerpt: '3년 연속 세계적 수준의 전문대학(WCC)으로 선정',
-    content: '교육부가 주관하는 WCC 평가에서 우수한 성적을 거두며 3년 연속 선정되는 쾌거를 이루었습니다.',
-    date: '2025-12-05',
-    category: '수상',
-    image: 'https://images.unsplash.com/photo-1710616836472-ff86042cd881?w=800',
-    author: '기획처',
-  },
-  {
-    id: 'n4',
-    title: '90주년 기념 장학금 30억 조성',
-    excerpt: '동문들의 기부로 미래 인재 육성을 위한 장학 기금 마련',
-    content: '졸업 동문들의 뜻깊은 기부로 90주년 기념 장학 기금 30억원이 조성되었으며, 매년 100명 이상의 학생들이 장학 혜택을 받게 됩니다.',
-    date: '2025-11-28',
-    category: '장학',
-    image: 'https://images.unsplash.com/photo-1591218214141-45545921d2d9?w=800',
-    author: '장학팀',
-  },
-  {
-    id: 'n5',
-    title: 'AI 기반 스마트 캠퍼스 구축 완료',
-    excerpt: '첨단 기술로 학생들의 편의성과 안전성 대폭 향상',
-    content: '인공지능과 IoT 기술을 활용한 스마트 캠퍼스 시스템이 전면 도입되어 학습 환경이 획기적으로 개선되었습니다.',
-    date: '2025-11-20',
-    category: '기술',
-    image: 'https://images.unsplash.com/photo-1758270705172-07b53627dfcb?w=800',
-    author: '정보처',
-  },
-  {
-    id: 'n6',
-    title: '취업률 95% 달성, 전국 1위',
-    excerpt: '보건 계열 전문대학 중 최고 취업률 기록',
-    content: '2025학년도 졸업생의 취업률이 95%를 돌파하며 전국 보건 계열 전문대학 중 1위를 차지했습니다.',
-    date: '2025-11-15',
-    category: '성과',
-    image: 'https://images.unsplash.com/photo-1763615834709-cd4b196980db?w=800',
-    author: '취업지원센터',
-  },
-];
+const categoryLabels: Record<string, string> = {
+  'all': '전체',
+  'anniversary': '90주년',
+  'achievement': '성과',
+  'event': '행사',
+  'general': '일반',
+};
 
-const categories = ['전체', '시설', '협약', '수상', '장학', '기술', '성과'];
+const categories = ['all', 'anniversary', 'achievement', 'event', 'general'];
+
+// Helper: Firestore NewsArticle → Display NewsArticle
+function convertNewsArticle(article: FirestoreNewsArticle): NewsArticleDisplay {
+  const publishedAt = article.publishedAt instanceof Timestamp
+    ? article.publishedAt.toDate()
+    : new Date();
+
+  return {
+    id: article.id,
+    title: article.title,
+    excerpt: article.summary,
+    content: article.content,
+    date: publishedAt.toISOString().split('T')[0],
+    category: article.category,
+    image: article.thumbnail || 'https://images.unsplash.com/photo-1689858210110-03f1e91f8c69?w=800',
+    author: article.author,
+  };
+}
 
 export default function NewsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('전체');
-  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedArticle, setSelectedArticle] = useState<NewsArticleDisplay | null>(null);
   const [email, setEmail] = useState('');
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [subscribeMessage, setSubscribeMessage] = useState<{
@@ -94,8 +59,28 @@ export default function NewsPage() {
     text: string;
   } | null>(null);
 
+  const [newsData, setNewsData] = useState<NewsArticleDisplay[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load news from Firestore
+  useEffect(() => {
+    const loadNews = async () => {
+      try {
+        const data = await getPublicNews();
+        const displayData = data.map(convertNewsArticle);
+        setNewsData(displayData);
+      } catch (error) {
+        console.error('Error loading news:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadNews();
+  }, []);
+
   const filteredNews =
-    selectedCategory === '전체'
+    selectedCategory === 'all'
       ? newsData
       : newsData.filter((news) => news.category === selectedCategory);
 
@@ -126,7 +111,6 @@ export default function NewsPage() {
 
     setIsSubscribing(false);
 
-    // 3초 후 메시지 제거
     setTimeout(() => {
       setSubscribeMessage(null);
     }, 3000);
@@ -155,38 +139,47 @@ export default function NewsPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {category}
+              {categoryLabels[category]}
             </motion.button>
           ))}
         </div>
       </section>
 
-      {/* News Grid */}
-      <section className="mb-20">
-        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <AnimatePresence mode="popLayout">
-            {filteredNews.map((article, index) => (
-              <NewsCard
-                key={article.id}
-                article={article}
-                index={index}
-                onClick={() => setSelectedArticle(article)}
-              />
-            ))}
-          </AnimatePresence>
-        </motion.div>
+      {/* Loading State */}
+      {loading && (
+        <div className="text-center py-20">
+          <p className="text-gray-500 text-lg">뉴스를 불러오는 중...</p>
+        </div>
+      )}
 
-        {/* Empty State */}
-        {filteredNews.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
-            <p className="text-gray-500 text-lg">선택한 카테고리에 소식이 없습니다.</p>
+      {/* News Grid */}
+      {!loading && (
+        <section className="mb-20">
+          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnimatePresence mode="popLayout">
+              {filteredNews.map((article, index) => (
+                <NewsCard
+                  key={article.id}
+                  article={article}
+                  index={index}
+                  onClick={() => setSelectedArticle(article)}
+                />
+              ))}
+            </AnimatePresence>
           </motion.div>
-        )}
-      </section>
+
+          {/* Empty State */}
+          {filteredNews.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-20"
+            >
+              <p className="text-gray-500 text-lg">선택한 카테고리에 소식이 없습니다.</p>
+            </motion.div>
+          )}
+        </section>
+      )}
 
       {/* Article Modal */}
       <ArticleModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />
@@ -253,7 +246,7 @@ function NewsCard({
   index,
   onClick,
 }: {
-  article: NewsArticle;
+  article: NewsArticleDisplay;
   index: number;
   onClick: () => void;
 }) {
@@ -284,7 +277,7 @@ function NewsCard({
 
         {/* Category Badge */}
         <div className="absolute top-3 right-3 bg-amber-500/90 px-3 py-1 rounded-full">
-          <span className="text-black font-bold text-xs">{article.category}</span>
+          <span className="text-black font-bold text-xs">{categoryLabels[article.category] || article.category}</span>
         </div>
       </div>
 
@@ -321,7 +314,7 @@ function ArticleModal({
   article,
   onClose,
 }: {
-  article: NewsArticle | null;
+  article: NewsArticleDisplay | null;
   onClose: () => void;
 }) {
   if (!article) return null;
@@ -349,7 +342,7 @@ function ArticleModal({
 
             {/* Category Badge */}
             <div className="absolute top-6 left-6 bg-amber-500/90 px-4 py-1.5 rounded-full">
-              <span className="text-black font-bold text-sm">{article.category}</span>
+              <span className="text-black font-bold text-sm">{categoryLabels[article.category] || article.category}</span>
             </div>
           </div>
 

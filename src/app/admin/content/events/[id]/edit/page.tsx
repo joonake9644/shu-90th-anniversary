@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ADMIN_ROUTES } from '@/lib/constants/routes';
 import { getEventById, updateEvent } from '@/lib/firestore/admin/events';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 /**
  * 이벤트 수정 페이지
@@ -275,24 +276,13 @@ export default function EventEditPage() {
             </select>
           </div>
 
-          {/* 이미지 URL */}
-          <div>
-            <label
-              htmlFor="image"
-              className="block text-sm font-medium text-gray-300 mb-2"
-            >
-              이미지 URL (선택)
-            </label>
-            <input
-              type="url"
-              id="image"
-              name="image"
-              value={formData.image}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-900 border border-white/20 text-white rounded-lg focus:border-amber-500 focus:outline-none"
-              placeholder="https://example.com/image.jpg"
-            />
-          </div>
+          {/* 이미지 업로드 */}
+          <ImageUpload
+            value={formData.image}
+            onChange={(url) => setFormData((prev) => ({ ...prev, image: url }))}
+            label="이벤트 이미지"
+            path="events"
+          />
 
           {/* 등록 링크 */}
           <div>

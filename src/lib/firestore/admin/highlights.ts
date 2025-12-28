@@ -35,6 +35,37 @@ export interface Highlight {
 }
 
 /**
+ * 모든 Period의 모든 Highlight 조회 (통합 관리용)
+ */
+export async function getAllHighlights(): Promise<(Highlight & { periodId: string })[]> {
+  const periodsRef = collection(db, PERIODS_COLLECTION);
+  const periodsSnapshot = await getDocs(periodsRef);
+
+  const allHighlights: (Highlight & { periodId: string })[] = [];
+
+  for (const periodDoc of periodsSnapshot.docs) {
+    const highlightsRef = collection(
+      db,
+      PERIODS_COLLECTION,
+      periodDoc.id,
+      HIGHLIGHTS_SUBCOLLECTION
+    );
+    const q = query(highlightsRef, orderBy('order', 'asc'));
+    const snapshot = await getDocs(q);
+
+    const highlights = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      periodId: periodDoc.id,
+      ...doc.data(),
+    })) as (Highlight & { periodId: string })[];
+
+    allHighlights.push(...highlights);
+  }
+
+  return allHighlights;
+}
+
+/**
  * 특정 Period의 모든 Highlight 조회 (order 순으로 정렬)
  */
 export async function getHighlightsByPeriod(periodId: string): Promise<Highlight[]> {

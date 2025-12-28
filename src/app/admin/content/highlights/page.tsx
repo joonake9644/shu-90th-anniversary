@@ -1,32 +1,32 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { ADMIN_ROUTES } from '@/lib/constants/routes';
-import { getPeriod, type Period } from '@/lib/firestore/admin/periods';
 import {
-  getHighlightsByPeriod,
+  getAllHighlights,
   createHighlight,
   updateHighlight,
   deleteHighlight,
   type Highlight,
 } from '@/lib/firestore/admin/highlights';
+import { getAllPeriods, type Period } from '@/lib/firestore/admin/periods';
 import { ImageUpload } from '@/components/admin/ImageUpload';
 
 export default function HighlightsManagementPage() {
   const router = useRouter();
-  const params = useParams();
-  const periodId = params.id as string;
   const { user, loading: authLoading } = useAuth();
 
-  const [period, setPeriod] = useState<Period | null>(null);
-  const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const [periods, setPeriods] = useState<Period[]>([]);
+  const [highlights, setHighlights] = useState<(Highlight & { periodId: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Omit<Highlight, 'id' | 'createdAt' | 'updatedAt'>>({
+  const [editingPeriodId, setEditingPeriodId] = useState<string | null>(null);
+  const [formData, setFormData] = useState<Omit<Highlight, 'id' | 'createdAt' | 'updatedAt'> & { periodId: string }>({
+    periodId: '',
     order: 1,
     title: '',
     year: '',
@@ -48,16 +48,16 @@ export default function HighlightsManagementPage() {
     if (user) {
       loadData();
     }
-  }, [user, periodId]);
+  }, [user]);
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const [periodData, highlightsData] = await Promise.all([
-        getPeriod(periodId),
-        getHighlightsByPeriod(periodId),
+      const [periodsData, highlightsData] = await Promise.all([
+        getAllPeriods(),
+        getAllHighlights(),
       ]);
-      setPeriod(periodData);
+      setPeriods(periodsData);
       setHighlights(highlightsData);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -70,19 +70,26 @@ export default function HighlightsManagementPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try {
-      const highlightId = editingId || `h${periodId.split('-')[1]}_${Date.now()}`;
+    if (!formData.periodId) {
+      setMessage({ type: 'error', text: 'Period를 선택해주세요.' });
+      return;
+    }
 
-      if (editingId) {
-        await updateHighlight(periodId, highlightId, formData);
+    try {
+      const highlightId = editingId || `h${Date.now()}`;
+      const { periodId, ...highlightData } = formData;
+
+      if (editingId && editingPeriodId) {
+        await updateHighlight(editingPeriodId, highlightId, highlightData);
         setMessage({ type: 'success', text: 'Highlight가 수정되었습니다.' });
       } else {
-        await createHighlight(periodId, highlightId, formData);
+        await createHighlight(periodId, highlightId, highlightData);
         setMessage({ type: 'success', text: 'Highlight가 추가되었습니다.' });
       }
 
       setShowForm(false);
       setEditingId(null);
+      setEditingPeriodId(null);
       resetForm();
       loadData();
     } catch (error) {
@@ -91,9 +98,11 @@ export default function HighlightsManagementPage() {
     }
   };
 
-  const handleEdit = (highlight: Highlight) => {
+  const handleEdit = (highlight: Highlight & { periodId: string }) => {
     setEditingId(highlight.id);
+    setEditingPeriodId(highlight.periodId);
     setFormData({
+      periodId: highlight.periodId,
       order: highlight.order,
       title: highlight.title,
       year: highlight.year,
@@ -104,7 +113,7 @@ export default function HighlightsManagementPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (highlightId: string, title: string) => {
+  const handleDelete = async (periodId: string, highlightId: string, title: string) => {
     if (!confirm(`"${title}" Highlight를 삭제하시겠습니까?`)) {
       return;
     }
@@ -119,9 +128,9 @@ export default function HighlightsManagementPage() {
     }
   };
 
-  const handleToggleEnabled = async (highlight: Highlight) => {
+  const handleToggleEnabled = async (highlight: Highlight & { periodId: string }) => {
     try {
-      await updateHighlight(periodId, highlight.id, { enabled: !highlight.enabled });
+      await updateHighlight(highlight.periodId, highlight.id, { enabled: !highlight.enabled });
       setMessage({ type: 'success', text: '상태가 변경되었습니다.' });
       loadData();
     } catch (error) {
@@ -132,6 +141,7 @@ export default function HighlightsManagementPage() {
 
   const resetForm = () => {
     setFormData({
+      periodId: periods.length > 0 ? periods[0].id : '',
       order: highlights.length + 1,
       title: '',
       year: '',
@@ -139,6 +149,11 @@ export default function HighlightsManagementPage() {
       description: '',
       enabled: true,
     });
+  };
+
+  const getPeriodTitle = (periodId: string) => {
+    const period = periods.find(p => p.id === periodId);
+    return period?.title || periodId;
   };
 
   if (authLoading || !user) {
@@ -155,9 +170,9 @@ export default function HighlightsManagementPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-amber-500">Highlight 관리</h1>
+              <h1 className="text-2xl font-bold text-amber-500">명장면 90 관리</h1>
               <p className="text-sm text-gray-400 mt-1">
-                {period?.title} - Highlights를 관리합니다
+                모든 Period의 Highlights를 통합 관리합니다
               </p>
             </div>
             <div className="flex gap-3">
@@ -166,6 +181,7 @@ export default function HighlightsManagementPage() {
                   onClick={() => {
                     resetForm();
                     setEditingId(null);
+                    setEditingPeriodId(null);
                     setShowForm(true);
                   }}
                   className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-lg transition-colors"
@@ -174,10 +190,10 @@ export default function HighlightsManagementPage() {
                 </button>
               )}
               <Link
-                href="/admin/content/periods"
+                href="/admin/dashboard"
                 className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
               >
-                Period 목록으로
+                대시보드로
               </Link>
             </div>
           </div>
@@ -199,6 +215,26 @@ export default function HighlightsManagementPage() {
               {editingId ? 'Highlight 수정' : '새 Highlight 추가'}
             </h2>
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Period 선택
+                </label>
+                <select
+                  value={formData.periodId}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, periodId: e.target.value }))}
+                  className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  required
+                  disabled={!!editingId}
+                >
+                  <option value="">Period를 선택하세요</option>
+                  {periods.map((period) => (
+                    <option key={period.id} value={period.id}>
+                      {period.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">순서</label>
@@ -284,6 +320,7 @@ export default function HighlightsManagementPage() {
                   onClick={() => {
                     setShowForm(false);
                     setEditingId(null);
+                    setEditingPeriodId(null);
                     resetForm();
                   }}
                   className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-colors"
@@ -313,13 +350,13 @@ export default function HighlightsManagementPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {highlights.map((highlight) => (
               <div
-                key={highlight.id}
+                key={`${highlight.periodId}-${highlight.id}`}
                 className="bg-gray-900 border border-white/10 rounded-lg p-4 hover:border-white/20 transition-colors"
               >
-                <div className="flex gap-4">
+                <div className="flex gap-4 mb-4">
                   <img
                     src={highlight.thumb}
                     alt={highlight.title}
@@ -339,7 +376,12 @@ export default function HighlightsManagementPage() {
                     <p className="text-xs text-gray-400 line-clamp-2">{highlight.description}</p>
                   </div>
                 </div>
-                <div className="flex gap-2 mt-4">
+                <div className="border-t border-white/10 pt-3 mb-3">
+                  <p className="text-xs text-gray-500">
+                    Period: <span className="text-amber-500">{getPeriodTitle(highlight.periodId)}</span>
+                  </p>
+                </div>
+                <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(highlight)}
                     className="flex-1 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded transition-colors"
@@ -353,7 +395,7 @@ export default function HighlightsManagementPage() {
                     {highlight.enabled ? '비활성화' : '활성화'}
                   </button>
                   <button
-                    onClick={() => handleDelete(highlight.id, highlight.title)}
+                    onClick={() => handleDelete(highlight.periodId, highlight.id, highlight.title)}
                     className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-colors"
                   >
                     삭제

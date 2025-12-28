@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ADMIN_ROUTES } from '@/lib/constants/routes';
 import { createNews } from '@/lib/firestore/admin/news';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 /**
  * 뉴스 작성 페이지
@@ -174,24 +175,13 @@ export default function NewsCreatePage() {
             />
           </div>
 
-          {/* 썸네일 URL */}
-          <div>
-            <label
-              htmlFor="thumbnail"
-              className="block text-sm font-medium text-gray-300 mb-2"
-            >
-              썸네일 URL (선택)
-            </label>
-            <input
-              type="url"
-              id="thumbnail"
-              name="thumbnail"
-              value={formData.thumbnail}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-900 border border-white/20 text-white rounded-lg focus:border-amber-500 focus:outline-none"
-              placeholder="https://example.com/image.jpg"
-            />
-          </div>
+          {/* 썸네일 이미지 */}
+          <ImageUpload
+            value={formData.thumbnail}
+            onChange={(url) => setFormData((prev) => ({ ...prev, thumbnail: url }))}
+            label="썸네일 이미지"
+            path="news"
+          />
 
           {/* 작성자 */}
           <div>

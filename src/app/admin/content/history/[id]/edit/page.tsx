@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getHistoryChapter, updateHistoryChapter } from '@/lib/firestore/admin/history';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 export default function EditHistoryChapterPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -170,21 +171,13 @@ export default function EditHistoryChapterPage({ params }: { params: { id: strin
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">이미지 URL *</label>
-              <input
-                type="url"
-                value={formData.imageUrl}
-                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
-                required
-              />
-              {formData.imageUrl && (
-                <div className="mt-2 relative w-full h-48 rounded-lg overflow-hidden">
-                  <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                </div>
-              )}
-            </div>
+            <ImageUpload
+              value={formData.imageUrl}
+              onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+              label="챕터 이미지"
+              path="history"
+              required
+            />
           </div>
 
           {/* 하이라이트 */}

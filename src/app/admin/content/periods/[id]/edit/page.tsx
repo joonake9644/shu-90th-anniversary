@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { ADMIN_ROUTES } from '@/lib/constants/routes';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 import {
   getPeriod,
   updatePeriod,
@@ -242,30 +243,13 @@ export default function EditPeriodPage() {
               {/* 이미지 */}
               <div className="bg-gray-900 border border-white/10 rounded-lg p-6">
                 <h2 className="text-xl font-bold text-white mb-6">히어로 이미지</h2>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    이미지 URL
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.heroMedia}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, heroMedia: e.target.value }))
-                    }
-                    className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    placeholder="https://images.unsplash.com/..."
-                    required
-                  />
-                  {formData.heroMedia && (
-                    <div className="mt-4">
-                      <img
-                        src={formData.heroMedia}
-                        alt="Preview"
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                    </div>
-                  )}
-                </div>
+                <ImageUpload
+                  value={formData.heroMedia}
+                  onChange={(url) => setFormData((prev) => ({ ...prev, heroMedia: url }))}
+                  label="기간 대표 이미지"
+                  path="periods"
+                  required
+                />
               </div>
 
               {/* 활성화 */}
