@@ -1,7 +1,36 @@
 rules_version = '2';
 
+/**
+ * ⚠️⚠️⚠️ WARNING: TEST MODE - NOT FOR PRODUCTION ⚠️⚠️⚠️
+ *
+ * 현재 모드: 테스트 모드 (모든 읽기/쓰기 허용)
+ * 목적: 개발 및 테스트
+ *
+ * ⚠️ 프로덕션 배포 전 반드시 변경 필요!
+ *
+ * 프로덕션 모드로 전환 방법:
+ * 1. 이 파일을 firestore.rules.production 으로 교체
+ * 2. firebase deploy --only firestore 실행
+ *
+ * 작성일: 2025-12-30
+ * ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+ */
+
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ============================================
+    // 테스트 모드: 모든 컬렉션 읽기/쓰기 허용
+    // ============================================
+    match /{document=**} {
+      allow read: if true;   // 누구나 읽기 가능
+      allow write: if true;  // 누구나 쓰기 가능 (개발 중)
+    }
+
+    // ⚠️ 프로덕션에서는 위 규칙을 삭제하고
+    // firestore.rules.production 내용으로 교체하세요!
+
+    // ============ 아래는 기존 규칙 (참고용) ============
 
     // ============ 방명록 (Guestbook) ============
     match /guestbook/{entryId} {

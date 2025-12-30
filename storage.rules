@@ -1,77 +1,33 @@
 rules_version = '2';
 
+/**
+ * ⚠️⚠️⚠️ WARNING: TEST MODE - NOT FOR PRODUCTION ⚠️⚠️⚠️
+ *
+ * 현재 모드: 테스트 모드 (모든 읽기/쓰기 허용)
+ * 목적: 개발 및 테스트
+ *
+ * ⚠️ 프로덕션 배포 전 반드시 변경 필요!
+ *
+ * 프로덕션 모드로 전환 방법:
+ * 1. 이 파일을 storage.rules.production 으로 교체
+ * 2. firebase deploy --only storage 실행
+ *
+ * 작성일: 2025-12-30
+ * ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+ */
+
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // ============ 이미지 업로드 (공개) ============
-    match /uploads/{fileName} {
-      // 누구나 읽기 가능
-      allow read: if true;
-
-      // 인증된 사용자 또는 누구나 업로드 가능 (개발 중)
-      allow write: if request.resource.size < 50 * 1024 * 1024 // 50MB 제한
-                   && request.resource.contentType.matches('image/.*|video/.*');
-    }
-
-    // ============ Period 이미지 ============
-    match /periods/{fileName} {
-      allow read: if true;
-      allow write: if request.resource.size < 50 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*|video/.*');
-    }
-
-    // ============ Highlight 이미지 ============
-    match /highlights/{fileName} {
-      allow read: if true;
-      allow write: if request.resource.size < 50 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-
-    // ============ 뉴스 이미지 ============
-    match /news/{fileName} {
-      allow read: if true;
-      allow write: if request.resource.size < 50 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-
-    // ============ 이벤트 이미지 ============
-    match /events/{fileName} {
-      allow read: if true;
-      allow write: if request.resource.size < 50 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-
-    // ============ 비디오 파일 ============
-    match /videos/{fileName} {
-      allow read: if true;
-      allow write: if request.resource.size < 500 * 1024 * 1024 // 500MB 제한
-                   && request.resource.contentType.matches('video/.*');
-    }
-
-    // ============ 히스토리 이미지 ============
-    match /history/{fileName} {
-      allow read: if true;
-      allow write: if request.resource.size < 50 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-
-    // ============ Hero 섹션 배경 이미지 ============
-    match /hero/{fileName} {
-      allow read: if true;
-      allow write: if request.resource.size < 50 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-
-    // ============ 테스트 폴더 (개발용) ============
-    match /test/{allPaths=**} {
-      allow read: if true;
-      allow write: if true;  // 개발/테스트 목적으로 모두 허용
-    }
-
-    // ============ 기본 규칙: 나머지는 읽기만 허용 ============
+    // ============================================
+    // 테스트 모드: 모든 파일 읽기/쓰기 허용
+    // ============================================
     match /{allPaths=**} {
-      allow read: if true;
-      allow write: if false; // TODO: 관리자 인증 추가
+      allow read: if true;   // 누구나 읽기 가능
+      allow write: if true;  // 누구나 쓰기 가능 (개발 중)
     }
+
+    // ⚠️ 프로덕션에서는 위 규칙을 삭제하고
+    // storage.rules.production 내용으로 교체하세요!
   }
 }

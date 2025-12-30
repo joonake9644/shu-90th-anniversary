@@ -1,0 +1,83 @@
+rules_version = '2';
+
+/**
+ * PRODUCTION MODE - 프로덕션 보안 규칙
+ *
+ * 이 파일은 프로덕션 배포 시 사용합니다.
+ * storage.rules를 이 내용으로 교체하세요.
+ */
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ============ 이미지 업로드 (공개) ============
+    match /uploads/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null  // 인증된 사용자만
+                   && request.resource.size < 50 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*|video/.*');
+    }
+
+    // ============ Period 이미지 ============
+    match /periods/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 50 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*|video/.*');
+    }
+
+    // ============ Highlight 이미지 ============
+    match /highlights/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 50 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // ============ 뉴스 이미지 ============
+    match /news/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 50 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // ============ 이벤트 이미지 ============
+    match /events/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 50 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // ============ 비디오 파일 ============
+    match /videos/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 500 * 1024 * 1024
+                   && request.resource.contentType.matches('video/.*');
+    }
+
+    // ============ 히스토리 이미지 ============
+    match /history/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 50 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // ============ Hero 섹션 배경 이미지 ============
+    match /hero/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 50 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // ============ 기본 규칙: 읽기만 허용 ============
+    match /{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;  // 인증된 사용자만
+    }
+  }
+}
