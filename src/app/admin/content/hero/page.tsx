@@ -11,6 +11,7 @@ import {
   updateHeroContent,
   type HomepageHero,
 } from '@/lib/firestore/admin/hero';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 /**
  * HeroSection 콘텐츠 관리 페이지
@@ -159,17 +160,13 @@ export default function HeroManagementPage() {
                     </div>
                   )}
 
-                  {/* 배경 이미지 URL */}
+                  {/* 배경 이미지 업로드 */}
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      배경 이미지 URL <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="url"
+                    <ImageUpload
                       value={formData.backgroundImage}
-                      onChange={(e) => handleChange('backgroundImage', e.target.value)}
-                      className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      placeholder="https://..."
+                      onChange={(url) => handleChange('backgroundImage', url)}
+                      label="배경 이미지"
+                      path="hero"
                       required
                     />
                   </div>
