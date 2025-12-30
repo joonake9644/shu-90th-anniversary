@@ -162,6 +162,12 @@ service cloud.firestore {
       allow write: if true; // TODO: 관리자 인증 추가
     }
 
+    // ============ 테스트 컬렉션 (개발용) ============
+    match /test-collection/{docId} {
+      allow read: if true;
+      allow write: if true; // 개발/테스트 목적으로 모두 허용
+    }
+
     // ============ History Chapters (역사 갤러리) ============
     match /history_chapters/{chapterId} {
       allow read: if true;
