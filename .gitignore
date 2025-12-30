@@ -51,6 +51,10 @@ next-env.d.ts
 doc2/
 90_year_figma/
 
+# development history (local only - not for git)
+docs/DEVELOPMENT-HISTORY.md
+DEVELOPMENT-HISTORY.md
+
 # screenshot images
 *.png
 !public/**/*.png
