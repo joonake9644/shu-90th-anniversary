@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Storage 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #fbbf24;
+        }
+        h2 {
+            color: #fbbf24;
+            border-bottom: 2px solid #fbbf24;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #fbbf24;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+        button:hover {
+            background: #f59e0b;
+        }
+        #fileInput {
+            margin: 10px 0;
+        }
+        .file-item {
+            background: #1a1a1a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #444;
+        }
+        .file-item img {
+            max-width: 200px;
+            max-height: 200px;
+            display: block;
+            margin: 10px 0;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #fbbf24;
+        }
+        .error {
+            color: #ef4444;
+            padding: 10px;
+            background: #7f1d1d;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #10b981;
+            padding: 10px;
+            background: #064e3b;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #fbbf24;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #fbbf24;
+        }
+        .stat-label {
+            color: #999;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔥 Firebase Storage 연동 테스트</h1>
+
+    <div class="container">
+        <h2>📊 Storage 통계</h2>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalFiles">0</div>
+                <div class="stat-label">전체 파일</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalImages">0</div>
+                <div class="stat-label">이미지</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalVideos">0</div>
+                <div class="stat-label">비디오</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalSize">0 MB</div>
+                <div class="stat-label">전체 크기</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📤 파일 업로드 테스트</h2>
+        <input type="file" id="fileInput" accept="image/*,video/*">
+        <button onclick="testUpload()">파일 업로드</button>
+        <div id="uploadStatus"></div>
+    </div>
+
+    <div class="container">
+        <h2>📁 Storage 파일 목록</h2>
+        <button onclick="loadFiles()">파일 목록 새로고침</button>
+        <div id="fileList" class="loading">로딩 중...</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import {
+            getStorage,
+            ref,
+            listAll,
+            getDownloadURL,
+            uploadBytes,
+            deleteObject,
+            getMetadata
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyAFL2UzS-p_NAt3iGpI2V__S8g-B_72kZs",
+            authDomain: "shu-90th-anniversary.firebaseapp.com",
+            projectId: "shu-90th-anniversary",
+            storageBucket: "shu-90th-anniversary.firebasestorage.app",
+            messagingSenderId: "875713156990",
+            appId: "1:875713156990:web:b8ad8badb7e2dbebedc52f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+
+        let allFiles = [];
+
+        // 파일 목록 로드
+        async function loadAllFiles() {
+            const folders = ['uploads', 'periods', 'highlights', 'news', 'events', 'videos', 'history'];
+            const files = [];
+            let totalSize = 0;
+            let imageCount = 0;
+            let videoCount = 0;
+
+            for (const folder of folders) {
+                try {
+                    const folderRef = ref(storage, folder);
+                    const result = await listAll(folderRef);
+
+                    for (const itemRef of result.items) {
+                        try {
+                            const url = await getDownloadURL(itemRef);
+                            const metadata = await getMetadata(itemRef);
+
+                            const fileInfo = {
+                                name: itemRef.name,
+                                url,
+                                path: itemRef.fullPath,
+                                size: metadata.size,
+                                type: metadata.contentType || 'unknown',
+                                uploadedAt: new Date(metadata.timeCreated),
+                                ref: itemRef
+                            };
+
+                            files.push(fileInfo);
+                            totalSize += metadata.size;
+
+                            if (metadata.contentType?.startsWith('image/')) {
+                                imageCount++;
+                            } else if (metadata.contentType?.startsWith('video/')) {
+                                videoCount++;
+                            }
+                        } catch (error) {
+                            console.error(`Error loading ${itemRef.name}:`, error);
+                        }
+                    }
+                } catch (error) {
+                    console.log(`Folder ${folder} not found or empty`);
+                }
+            }
+
+            // 통계 업데이트
+            document.getElementById('totalFiles').textContent = files.length;
+            document.getElementById('totalImages').textContent = imageCount;
+            document.getElementById('totalVideos').textContent = videoCount;
+            document.getElementById('totalSize').textContent = (totalSize / 1024 / 1024).toFixed(2) + ' MB';
+
+            return files.sort((a, b) => b.uploadedAt - a.uploadedAt);
+        }
+
+        // 파일 목록 표시
+        window.loadFiles = async function() {
+            const fileListDiv = document.getElementById('fileList');
+            fileListDiv.innerHTML = '<div class="loading">파일 목록을 불러오는 중...</div>';
+
+            try {
+                allFiles = await loadAllFiles();
+
+                if (allFiles.length === 0) {
+                    fileListDiv.innerHTML = '<p>Storage에 파일이 없습니다.</p>';
+                    return;
+                }
+
+                fileListDiv.innerHTML = allFiles.map(file => `
+                    <div class="file-item">
+                        <strong>📄 ${file.name}</strong><br>
+                        경로: ${file.path}<br>
+                        크기: ${(file.size / 1024).toFixed(2)} KB<br>
+                        타입: ${file.type}<br>
+                        업로드: ${file.uploadedAt.toLocaleString('ko-KR')}<br>
+                        ${file.type.startsWith('image/') ?
+                            `<img src="${file.url}" alt="${file.name}">` : ''}
+                        <br>
+                        <button onclick="copyUrl('${file.url}')">URL 복사</button>
+                        <button onclick="deleteFile('${file.path}')" style="background: #ef4444;">삭제</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading files:', error);
+                fileListDiv.innerHTML = `<div class="error">파일 목록을 불러오는데 실패했습니다: ${error.message}</div>`;
+            }
+        };
+
+        // 파일 업로드 테스트
+        window.testUpload = async function() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const statusDiv = document.getElementById('uploadStatus');
+
+            if (!file) {
+                statusDiv.innerHTML = '<div class="error">파일을 선택해주세요.</div>';
+                return;
+            }
+
+            try {
+                statusDiv.innerHTML = '<div class="loading">업로드 중...</div>';
+
+                // 파일 타입에 따라 폴더 결정
+                let folder = 'uploads';
+                if (file.type.startsWith('video/')) {
+                    folder = 'videos';
+                }
+
+                const timestamp = Date.now();
+                const fileName = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+                const storageRef = ref(storage, `${folder}/${fileName}`);
+
+                await uploadBytes(storageRef, file);
+                const url = await getDownloadURL(storageRef);
+
+                statusDiv.innerHTML = `
+                    <div class="success">
+                        ✅ 업로드 성공!<br>
+                        파일명: ${fileName}<br>
+                        경로: ${folder}/${fileName}<br>
+                        URL: <a href="${url}" target="_blank">${url}</a>
+                    </div>
+                `;
+
+                // 파일 목록 새로고침
+                await loadFiles();
+
+                // 파일 입력 초기화
+                fileInput.value = '';
+            } catch (error) {
+                console.error('Upload error:', error);
+                statusDiv.innerHTML = `<div class="error">업로드 실패: ${error.message}</div>`;
+            }
+        };
+
+        // URL 복사
+        window.copyUrl = function(url) {
+            navigator.clipboard.writeText(url);
+            alert('URL이 클립보드에 복사되었습니다!');
+        };
+
+        // 파일 삭제
+        window.deleteFile = async function(path) {
+            if (!confirm(`"${path}" 파일을 삭제하시겠습니까?`)) {
+                return;
+            }
+
+            try {
+                const fileRef = ref(storage, path);
+                await deleteObject(fileRef);
+                alert('파일이 삭제되었습니다.');
+                await loadFiles();
+            } catch (error) {
+                console.error('Delete error:', error);
+                alert(`삭제 실패: ${error.message}`);
+            }
+        };
+
+        // 페이지 로드 시 파일 목록 로드
+        loadFiles();
+    </script>
+</body>
+</html>

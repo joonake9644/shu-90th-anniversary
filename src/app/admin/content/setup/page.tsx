@@ -5,6 +5,7 @@ import { db } from '@/lib/firebase';
 import { collection, doc, setDoc, addDoc, Timestamp } from 'firebase/firestore';
 import { historyChapters } from '@/data/historyChapters';
 import { migrateInitialData } from '@/lib/firestore/admin/history';
+import { migrateImageToStorage } from '@/lib/utils/migrateImages';
 
 /**
  * 초기 데이터 설정 페이지
@@ -26,8 +27,18 @@ export default function SetupPage() {
     try {
       // 1. Hero 데이터
       addLog('Hero 데이터 생성 중...');
+      addLog('  🔄 Unsplash 이미지를 Storage로 마이그레이션 중...');
+
+      // Unsplash 이미지를 Firebase Storage에 저장
+      const heroImageUrl = await migrateImageToStorage(
+        'https://images.unsplash.com/photo-1730307403182-46906ab72173?w=1920',
+        'hero',
+        'background.jpg'
+      );
+      addLog(`  ✅ 이미지 저장 완료: ${heroImageUrl}`);
+
       await setDoc(doc(db, 'homepage_hero', 'main'), {
-        backgroundImage: 'https://images.unsplash.com/photo-1730307403182-46906ab72173?w=1920',
+        backgroundImage: heroImageUrl, // Storage URL 사용
         badgeText: 'THE 90TH ANNIVERSARY',
         mainNumber: '90',
         mainSubtitle1: 'YEARS',

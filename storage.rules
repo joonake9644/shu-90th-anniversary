@@ -55,6 +55,13 @@ service firebase.storage {
                    && request.resource.contentType.matches('image/.*');
     }
 
+    // ============ Hero 섹션 배경 이미지 ============
+    match /hero/{fileName} {
+      allow read: if true;
+      allow write: if request.resource.size < 50 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
     // ============ 테스트 폴더 (개발용) ============
     match /test/{allPaths=**} {
       allow read: if true;
