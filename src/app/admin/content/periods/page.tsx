@@ -42,15 +42,20 @@ export default function PeriodsManagementPage() {
       const data = await getAllPeriods();
       setPeriods(data);
 
-      // 각 Period의 Highlights 개수 조회
-      const counts: Record<string, number> = {};
-      await Promise.all(
-        data.map(async (period) => {
-          const highlights = await getHighlightsByPeriod(period.id);
-          counts[period.id] = highlights.length;
-        })
-      );
-      setHighlightCounts(counts);
+      // 데이터 없을 때 안내
+      if (data.length === 0) {
+        setMessage({ type: 'error', text: 'Period 데이터가 없습니다. Setup 페이지에서 초기 데이터를 생성해주세요.' });
+      } else {
+        // 각 Period의 Highlights 개수 조회
+        const counts: Record<string, number> = {};
+        await Promise.all(
+          data.map(async (period) => {
+            const highlights = await getHighlightsByPeriod(period.id);
+            counts[period.id] = highlights.length;
+          })
+        );
+        setHighlightCounts(counts);
+      }
     } catch (error) {
       console.error('Error loading periods:', error);
       setMessage({ type: 'error', text: 'Period 목록을 불러오는데 실패했습니다.' });

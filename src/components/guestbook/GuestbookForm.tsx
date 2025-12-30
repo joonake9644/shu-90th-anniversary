@@ -27,7 +27,10 @@ export function GuestbookForm({ onSubmitSuccess }: GuestbookFormProps) {
 
     setIsSubmitting(true);
     try {
-      await addGuestbookEntry(formData);
+      console.log('방명록 등록 시작:', formData);
+      const entryId = await addGuestbookEntry(formData);
+      console.log('방명록 등록 성공! ID:', entryId);
+
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
@@ -40,9 +43,26 @@ export function GuestbookForm({ onSubmitSuccess }: GuestbookFormProps) {
         });
         onSubmitSuccess();
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('방명록 작성 중 오류:', error);
-      alert('방명록 작성에 실패했습니다. 다시 시도해주세요.');
+      console.error('에러 상세:', {
+        message: error?.message,
+        code: error?.code,
+        details: error?.details,
+      });
+
+      // 더 자세한 에러 메시지 표시
+      let errorMessage = '방명록 작성에 실패했습니다.';
+
+      if (error?.code === 'permission-denied') {
+        errorMessage = 'Firebase 권한이 없습니다. 관리자에게 문의하세요.';
+      } else if (error?.code === 'unavailable') {
+        errorMessage = '네트워크 연결을 확인해주세요.';
+      } else if (error?.message) {
+        errorMessage = `오류: ${error.message}`;
+      }
+
+      alert(errorMessage + '\n\n브라우저 콘솔(F12)에서 자세한 내용을 확인하세요.');
     } finally {
       setIsSubmitting(false);
     }

@@ -186,15 +186,17 @@ function BigStatCard({
   description: string;
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  // 모바일 최적화: margin을 0으로 설정하여 즉시 애니메이션 시작
+  const isInView = useInView(ref, { once: true, margin: '0px', amount: 0.3 });
   const count = useMotionValue(0);
   const rounded = useTransform(count, (latest) => Math.round(latest));
   const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
     if (isInView) {
+      // 애니메이션 시간 80% 단축: 2초 → 0.4초
       const animation = animate(count, number, {
-        duration: 2,
+        duration: 0.4,
         ease: 'easeOut',
       });
 
@@ -214,19 +216,22 @@ function BigStatCard({
       ref={ref}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.6 }}
       className="relative group"
     >
-      <div className="bg-white/5 rounded-2xl p-8 border border-white/10 hover:border-amber-500/50 transition-all duration-500 h-full">
-        <div className="text-6xl md:text-7xl font-bold text-amber-500 mb-4 font-mono">
-          {displayValue.toLocaleString()}
-          <span className="text-4xl">{suffix}</span>
+      <div className="bg-white/5 rounded-2xl p-6 md:p-8 border border-white/10 hover:border-amber-500/50 transition-all duration-500 h-full flex flex-col justify-between">
+        {/* 숫자 크기 조정: 박스에 맞게 반응형 크기 설정 */}
+        <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-amber-500 mb-3 font-mono leading-none break-all">
+          <span className="inline-block">{displayValue.toLocaleString()}</span>
+          <span className="text-2xl sm:text-3xl md:text-4xl align-top">{suffix}</span>
         </div>
-        <div className="text-sm text-gray-400 uppercase tracking-widest mb-2">
-          {label}
+        <div>
+          <div className="text-xs sm:text-sm text-gray-400 uppercase tracking-widest mb-2">
+            {label}
+          </div>
+          <div className="text-xs text-gray-600">{description}</div>
         </div>
-        <div className="text-xs text-gray-600">{description}</div>
 
         {/* Hover Glow */}
         <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-br from-amber-500/10 to-transparent" />
@@ -336,15 +341,17 @@ function AnimatedNumber({
   className?: string;
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true });
+  // 모바일 최적화: margin을 0으로 설정하여 즉시 애니메이션 시작
+  const isInView = useInView(ref, { once: true, margin: '0px', amount: 0.3 });
   const count = useMotionValue(0);
   const rounded = useTransform(count, (latest) => Math.round(latest));
   const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
     if (isInView) {
+      // 애니메이션 시간 80% 단축: 1.5초 → 0.3초
       const animation = animate(count, value, {
-        duration: 1.5,
+        duration: 0.3,
         ease: 'easeOut',
       });
 

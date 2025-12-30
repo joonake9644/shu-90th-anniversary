@@ -48,11 +48,10 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ containerRef }: HeroSectionProps) {
-    // CMS 콘텐츠 상태
+    // CMS 콘텐츠 상태 - fallback 데이터로 즉시 렌더링
     const [hero, setHero] = useState<HomepageHero>(fallbackHero);
-    const [loading, setLoading] = useState(true);
 
-    // Firestore에서 콘텐츠 로드
+    // Firestore에서 콘텐츠 로드 (백그라운드에서)
     useEffect(() => {
         const loadHero = async () => {
             try {
@@ -62,9 +61,7 @@ export function HeroSection({ containerRef }: HeroSectionProps) {
                 }
             } catch (error) {
                 console.error('Error loading hero content:', error);
-                // Fallback 데이터 사용
-            } finally {
-                setLoading(false);
+                // Fallback 데이터 계속 사용
             }
         };
 
@@ -90,11 +87,6 @@ export function HeroSection({ containerRef }: HeroSectionProps) {
     const bigTextScale = useTransform(scrollYProgress, [0, 0.5], [1, 1.8]); // Expands drastically
     const contentOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]); // Fades out early
     const contentBlur = useTransform(scrollYProgress, [0, 0.4], ["blur(0px)", "blur(10px)"]);
-
-    // 로딩 중일 때는 빈 화면 표시 (애니메이션 깜빡임 방지)
-    if (loading) {
-        return <section className="relative h-screen bg-black" />;
-    }
 
     return (
         <section className="relative h-screen flex flex-col items-center justify-center overflow-hidden bg-black text-white">

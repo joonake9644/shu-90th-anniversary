@@ -36,14 +36,14 @@ export interface Highlight {
 
 /**
  * 모든 Period의 모든 Highlight 조회 (통합 관리용)
+ * 성능 최적화: 병렬 처리로 로딩 속도 향상
  */
 export async function getAllHighlights(): Promise<(Highlight & { periodId: string })[]> {
   const periodsRef = collection(db, PERIODS_COLLECTION);
   const periodsSnapshot = await getDocs(periodsRef);
 
-  const allHighlights: (Highlight & { periodId: string })[] = [];
-
-  for (const periodDoc of periodsSnapshot.docs) {
+  // 모든 Period의 Highlights를 병렬로 가져오기
+  const highlightPromises = periodsSnapshot.docs.map(async (periodDoc) => {
     const highlightsRef = collection(
       db,
       PERIODS_COLLECTION,
@@ -53,14 +53,18 @@ export async function getAllHighlights(): Promise<(Highlight & { periodId: strin
     const q = query(highlightsRef, orderBy('order', 'asc'));
     const snapshot = await getDocs(q);
 
-    const highlights = snapshot.docs.map((doc) => ({
+    return snapshot.docs.map((doc) => ({
       id: doc.id,
       periodId: periodDoc.id,
       ...doc.data(),
     })) as (Highlight & { periodId: string })[];
+  });
 
-    allHighlights.push(...highlights);
-  }
+  // 모든 Promise가 완료될 때까지 대기 (병렬 실행)
+  const highlightArrays = await Promise.all(highlightPromises);
+
+  // 2차원 배열을 1차원 배열로 평탄화
+  const allHighlights = highlightArrays.flat();
 
   return allHighlights;
 }

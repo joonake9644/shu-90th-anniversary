@@ -64,8 +64,8 @@ const fallbackActs: HistoryStoryAct[] = [
 ];
 
 export default function HistoryStory() {
+    // fallback 데이터로 즉시 렌더링 - 로딩 상태 제거
     const [acts, setActs] = useState<HistoryStoryAct[]>(fallbackActs);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const loadActs = async () => {
@@ -76,9 +76,7 @@ export default function HistoryStory() {
                 }
             } catch (error) {
                 console.error('Error loading history story acts:', error);
-                // Fallback 사용
-            } finally {
-                setLoading(false);
+                // Fallback 데이터 계속 사용
             }
         };
 
@@ -236,6 +234,9 @@ export default function HistoryStory() {
                                         alt="Hardship"
                                         fill
                                         className="object-cover opacity-60"
+                                        priority
+                                        loading="eager"
+                                        sizes="(max-width: 768px) 100vw, 50vw"
                                     />
                                     {/* Gold Glow on Subject (Simulated) */}
                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-amber-500/20 rounded-full blur-[40px] mix-blend-color-dodge"></div>

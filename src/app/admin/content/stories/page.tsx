@@ -196,11 +196,24 @@ export default function StoriesManagementPage() {
 
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-gray-400">로딩 중...</p>
+              <div className="flex flex-col items-center gap-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
+                <p className="text-gray-400">사연을 불러오는 중...</p>
+              </div>
             </div>
           ) : stories.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-400">받은 사연이 없습니다.</p>
+              <p className="text-gray-400 mb-4">받은 사연이 없습니다.</p>
+              <p className="text-sm text-gray-500 mb-6">
+                Setup 페이지에서 더미 데이터를 생성하거나,<br />
+                메인 홈페이지에서 사연을 제출해보세요.
+              </p>
+              <Link
+                href="/admin/content/setup"
+                className="inline-block px-6 py-3 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-lg transition-colors"
+              >
+                Setup 페이지로 이동
+              </Link>
             </div>
           ) : (
             <div className="overflow-x-auto">

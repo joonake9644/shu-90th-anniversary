@@ -37,16 +37,16 @@
 
 'use client';
 
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, lazy, Suspense, memo } from 'react';
 import { HeroSection } from '@/components/sections/HeroSection';
 import { TimelineIntro } from '@/components/sections/TimelineIntro';
-import { MarqueeSection } from '@/components/sections/MarqueeSection';
-import { PeriodSection } from '@/components/sections/PeriodSection';
 import { TimelineProgressBar } from '@/components/layout/TimelineProgressBar';
 import { Footer } from '@/components/layout/Footer';
 
-// HistoryStory를 Lazy Loading으로 최적화
+// 성능 최적화: 초기 로딩에 필요하지 않은 컴포넌트들을 Lazy Loading
 const HistoryStory = lazy(() => import('@/components/sections/HistoryStory'));
+const MarqueeSection = lazy(() => import('@/components/sections/MarqueeSection'));
+const PeriodSection = lazy(() => import('@/components/sections/PeriodSection'));
 import { getPublicMarqueeTexts } from '@/lib/firestore/public/marquee';
 import type { MarqueeText } from '@/lib/firestore/admin/marquee';
 import { getPublicPeriodsWithHighlights } from '@/lib/firestore/public/periods';
@@ -78,31 +78,32 @@ const fallbackPeriods: PeriodWithHighlights[] = timelineData as PeriodWithHighli
 
 export default function Home() {
     const [activePeriod, setActivePeriod] = useState<string | null>(null);
+    // fallback 데이터로 즉시 렌더링 - 로딩 상태 제거
     const [marquees, setMarquees] = useState<MarqueeText[]>(fallbackMarquees);
-    const [periods, setPeriods] = useState<PeriodWithHighlights[]>(fallbackPeriods); // Fallback 데이터로 초기화
-    const [loading, setLoading] = useState(true);
+    const [periods, setPeriods] = useState<PeriodWithHighlights[]>(fallbackPeriods);
 
-    // Marquee & Period 데이터 로드
+    // Marquee & Period 데이터 병렬 로드 (Promise.all)
     useEffect(() => {
         const loadData = async () => {
             try {
-                // Marquee 데이터 로드
-                const marqueeData = await getPublicMarqueeTexts();
+                // 병렬로 데이터 로드하여 성능 향상
+                const [marqueeData, periodData] = await Promise.all([
+                    getPublicMarqueeTexts(),
+                    getPublicPeriodsWithHighlights()
+                ]);
+
+                // Marquee 데이터 업데이트
                 if (marqueeData.length > 0) {
                     setMarquees(marqueeData);
                 }
 
-                // Period & Highlight 데이터 로드
-                const periodData = await getPublicPeriodsWithHighlights();
+                // Period 데이터 업데이트
                 if (periodData && periodData.length > 0) {
                     setPeriods(periodData);
                 }
-                // Firestore 데이터가 없으면 fallback 데이터 유지
             } catch (error) {
                 console.error('Error loading data:', error);
-                // Fallback 데이터(timelineData)가 이미 초기값으로 설정됨
-            } finally {
-                setLoading(false);
+                // Fallback 데이터 계속 사용
             }
         };
 
@@ -140,33 +141,43 @@ export default function Home() {
             </Suspense>
 
             {/* Divider - Marquee 1 */}
-            {marquees[0] && marquees[0].enabled && (
-                <MarqueeSection
-                    text={marquees[0].text}
-                    direction={marquees[0].direction}
-                    speed={marquees[0].speed}
-                />
-            )}
+            <Suspense fallback={<div className="h-20 bg-black" />}>
+                {marquees[0] && marquees[0].enabled && (
+                    <MarqueeSection
+                        text={marquees[0].text}
+                        direction={marquees[0].direction}
+                        speed={marquees[0].speed}
+                    />
+                )}
+            </Suspense>
 
             {/* Detailed Period Sections */}
             <div className="relative z-10">
-                {periods.map((period) => (
-                    <PeriodSection
-                        key={period.id}
-                        period={period}
-                        onInView={handleInView}
-                    />
-                ))}
+                <Suspense fallback={
+                    <div className="min-h-screen bg-black flex items-center justify-center">
+                        <div className="text-amber-500/50 text-lg">시대별 역사를 불러오는 중...</div>
+                    </div>
+                }>
+                    {periods.map((period) => (
+                        <PeriodSection
+                            key={period.id}
+                            period={period}
+                            onInView={handleInView}
+                        />
+                    ))}
+                </Suspense>
             </div>
 
             {/* Footer Divider - Marquee 2 */}
-            {marquees[1] && marquees[1].enabled && (
-                <MarqueeSection
-                    text={marquees[1].text}
-                    direction={marquees[1].direction}
-                    speed={marquees[1].speed}
-                />
-            )}
+            <Suspense fallback={<div className="h-20 bg-black" />}>
+                {marquees[1] && marquees[1].enabled && (
+                    <MarqueeSection
+                        text={marquees[1].text}
+                        direction={marquees[1].direction}
+                        speed={marquees[1].speed}
+                    />
+                )}
+            </Suspense>
 
             <Footer />
 

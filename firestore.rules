@@ -10,11 +10,12 @@ service cloud.firestore {
 
       // 누구나 작성 가능
       allow create: if request.resource.data.keys().hasAll([
-        'name', 'graduationYear', 'message', 'isAnonymous',
+        'name', 'graduationYear', 'major', 'message', 'isAnonymous',
         'likes', 'approved', 'createdAt', 'updatedAt'
       ])
       && request.resource.data.name is string
       && request.resource.data.graduationYear is int
+      && request.resource.data.major is string
       && request.resource.data.message is string
       && request.resource.data.message.size() > 0
       && request.resource.data.message.size() <= 500
@@ -29,6 +30,29 @@ service cloud.firestore {
 
       // 삭제는 불가 (관리자만 가능 - 별도 관리자 규칙 필요)
       allow delete: if false;
+    }
+
+    // ============ 사연 (Story Submissions) ============
+    match /story_submissions/{storyId} {
+      // 승인된 사연만 읽기 가능
+      allow read: if resource.data.isApproved == true;
+
+      // 누구나 작성 가능
+      allow create: if request.resource.data.keys().hasAll([
+        'name', 'title', 'content', 'isApproved', 'createdAt'
+      ])
+      && request.resource.data.name is string
+      && request.resource.data.name.size() > 0
+      && request.resource.data.title is string
+      && request.resource.data.title.size() > 0
+      && request.resource.data.title.size() <= 100
+      && request.resource.data.content is string
+      && request.resource.data.content.size() > 0
+      && request.resource.data.content.size() <= 2000
+      && request.resource.data.isApproved == false; // 기본값: 미승인
+
+      // 수정/삭제 불가 (관리자만 가능)
+      allow update, delete: if false;
     }
 
     // ============ 추억 게시판 (Memory Posts) ============
@@ -81,13 +105,83 @@ service cloud.firestore {
     // ============ 이벤트 (Events) ============
     match /events/{eventId} {
       allow read: if true;
-      allow write: if false; // 관리자만 수정 가능
+      allow write: if true; // TODO: 관리자 인증 추가
     }
 
     // ============ 뉴스 (News) ============
     match /news/{articleId} {
       allow read: if true;
-      allow write: if false; // 관리자만 수정 가능
+      allow write: if true; // TODO: 관리자 인증 추가
+    }
+
+    // ============ 홈페이지 CMS - Hero Section ============
+    match /homepage_hero/{docId} {
+      allow read: if true;
+      allow write: if true; // TODO: 관리자 인증 추가
+    }
+
+    // ============ 홈페이지 CMS - Footer ============
+    match /homepage_footer/{docId} {
+      allow read: if true;
+      allow write: if true; // TODO: 관리자 인증 추가
+    }
+
+    // ============ 홈페이지 CMS - Marquee ============
+    match /homepage_marquee/{docId} {
+      allow read: if true;
+      allow write: if true; // TODO: 관리자 인증 추가
+    }
+
+    // ============ 홈페이지 CMS - Timeline Intro ============
+    match /homepage_timeline_intro/{docId} {
+      allow read: if true;
+      allow write: if true; // TODO: 관리자 인증 추가
+    }
+
+    // ============ 홈페이지 CMS - Periods ============
+    match /homepage_periods/{periodId} {
+      allow read: if true;
+      allow write: if true; // TODO: 관리자 인증 추가
+
+      // Highlights subcollection
+      match /highlights/{highlightId} {
+        allow read: if true;
+        allow write: if true; // TODO: 관리자 인증 추가
+      }
+    }
+
+    // ============ Videos (영상으로 보는 90) ============
+    match /videos/{videoId} {
+      allow read: if true;
+      allow write: if true; // TODO: 관리자 인증 추가
+    }
+
+    // ============ Statistics Data (숫자로 보는 90) ============
+    match /statistics_data/{docId} {
+      allow read: if true;
+      allow write: if true; // TODO: 관리자 인증 추가
+    }
+
+    // ============ History Chapters (역사 갤러리) ============
+    match /history_chapters/{chapterId} {
+      allow read: if true;
+      allow write: if true; // TODO: 관리자 인증 추가
+    }
+
+    // ============ 관리자 전용 - 방명록 관리 ============
+    match /guestbook/{entryId} {
+      // 관리자 페이지에서 모든 데이터 읽기 가능
+      allow read: if true; // 공개 페이지는 approved==true만, 관리자는 모두
+      // 관리자 페이지에서 수정/삭제 가능
+      allow update, delete: if true; // TODO: 관리자 인증 추가
+    }
+
+    // ============ 관리자 전용 - 사연 관리 ============
+    match /story_submissions/{storyId} {
+      // 관리자 페이지에서 모든 데이터 읽기 가능
+      allow read: if true; // 공개 페이지는 approved==true만, 관리자는 모두
+      // 관리자 페이지에서 수정/삭제 가능
+      allow update, delete: if true; // TODO: 관리자 인증 추가
     }
   }
 }

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, memo } from 'react';
 import { motion, useScroll, useTransform, useInView, useSpring } from "framer-motion";
 import type { PeriodWithHighlights } from '@/lib/firestore/public/periods';
 import { HighlightCard } from '../ui/HighlightCard';
@@ -10,7 +10,8 @@ interface PeriodSectionProps {
   containerRef?: React.RefObject<HTMLElement>;
 }
 
-export function PeriodSection({ period, onInView, containerRef }: PeriodSectionProps) {
+// 성능 최적화: memo로 불필요한 리렌더링 방지
+const PeriodSectionComponent = ({ period, onInView, containerRef }: PeriodSectionProps) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { amount: 0.5 });
   
@@ -200,4 +201,10 @@ export function PeriodSection({ period, onInView, containerRef }: PeriodSectionP
       </div>
     </section>
   );
-}
+};
+
+// React.memo로 최적화된 컴포넌트 export
+export const PeriodSection = memo(PeriodSectionComponent);
+
+// default export로 lazy loading 지원
+export default PeriodSection;

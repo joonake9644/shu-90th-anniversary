@@ -44,6 +44,8 @@ export default function TimelineIntroManagementPage() {
     try {
       setLoading(true);
       const data = await getTimelineIntroContent();
+
+      // data가 null이어도 로딩 완료
       if (data) {
         setFormData({
           year1936Text: data.year1936Text,
@@ -53,6 +55,8 @@ export default function TimelineIntroManagementPage() {
           titleLeft: data.titleLeft,
           titleRight: data.titleRight,
         });
+      } else {
+        setMessage({ type: 'error', text: 'Timeline Intro 데이터가 없습니다. Setup 페이지에서 초기 데이터를 생성해주세요.' });
       }
     } catch (error) {
       console.error('Error loading content:', error);

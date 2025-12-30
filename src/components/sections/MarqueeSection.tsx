@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, memo } from 'react';
 import {
   motion,
   useScroll,
@@ -21,7 +21,8 @@ interface MarqueeSectionProps {
   speed?: number; // Base speed
 }
 
-export function MarqueeSection({ text, direction = 'left', speed = 5 }: MarqueeSectionProps) {
+// 성능 최적화: memo로 불필요한 리렌더링 방지
+const MarqueeSectionComponent = ({ text, direction = 'left', speed = 5 }: MarqueeSectionProps) => {
   const baseX = useMotionValue(0);
   const { scrollY } = useScroll();
   const scrollVelocity = useVelocity(scrollY);
@@ -76,4 +77,10 @@ export function MarqueeSection({ text, direction = 'left', speed = 5 }: MarqueeS
       </motion.div>
     </div>
   );
-}
+};
+
+// React.memo로 최적화된 컴포넌트 export
+export const MarqueeSection = memo(MarqueeSectionComponent);
+
+// default export로 lazy loading 지원
+export default MarqueeSection;

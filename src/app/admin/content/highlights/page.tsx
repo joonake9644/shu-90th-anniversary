@@ -142,7 +142,7 @@ export default function HighlightsManagementPage() {
   const resetForm = () => {
     setFormData({
       periodId: periods.length > 0 ? periods[0].id : '',
-      order: highlights.length + 1,
+      order: (highlights?.length || 0) + 1,
       title: '',
       year: '',
       thumb: '',
@@ -179,14 +179,19 @@ export default function HighlightsManagementPage() {
               {!showForm && (
                 <button
                   onClick={() => {
+                    if (periods.length === 0) {
+                      setMessage({ type: 'error', text: 'Period 데이터를 먼저 생성해주세요. Setup 페이지를 이용하세요.' });
+                      return;
+                    }
                     resetForm();
                     setEditingId(null);
                     setEditingPeriodId(null);
                     setShowForm(true);
                   }}
-                  className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-lg transition-colors"
+                  disabled={loading}
+                  className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-lg transition-colors disabled:bg-gray-700 disabled:text-gray-500"
                 >
-                  + 새 Highlight 추가
+                  {loading ? '로딩 중...' : '+ 새 Highlight 추가'}
                 </button>
               )}
               <Link
@@ -334,7 +339,21 @@ export default function HighlightsManagementPage() {
 
         {loading ? (
           <div className="bg-gray-900 border border-white/10 rounded-lg p-12 text-center">
-            <p className="text-gray-400">로딩 중...</p>
+            <div className="flex flex-col items-center gap-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
+              <p className="text-gray-400">데이터를 불러오는 중...</p>
+            </div>
+          </div>
+        ) : periods.length === 0 ? (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-12 text-center">
+            <p className="text-red-400 mb-4">⚠️ Period 데이터가 없습니다.</p>
+            <p className="text-gray-400 mb-6">Highlight를 추가하려면 먼저 Period를 생성해야 합니다.</p>
+            <Link
+              href="/admin/content/setup"
+              className="inline-block px-6 py-3 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-lg transition-colors"
+            >
+              Setup 페이지에서 Period 생성하기
+            </Link>
           </div>
         ) : highlights.length === 0 ? (
           <div className="bg-gray-900 border border-white/10 rounded-lg p-12 text-center">

@@ -253,6 +253,69 @@ export default function SetupPage() {
               enabled: true
             }
           ]
+        },
+        {
+          id: 'period-4',
+          order: 4,
+          rangeLabel: '1997 ~ 2016',
+          yearStart: 1997,
+          yearEnd: 2016,
+          title: 'Leap 도약기',
+          subtitle: '세계적 수준의 전문대학으로\nBecoming World-Class',
+          heroMedia: 'https://images.unsplash.com/photo-1758270705172-07b53627dfcb?w=1920',
+          enabled: true,
+          highlights: [
+            {
+              title: 'WCC(World Class College) 선정',
+              year: '2013',
+              thumb: 'https://images.unsplash.com/photo-1710616836472-ff86042cd881?w=800',
+              description: '세계적 수준의 전문대학으로 선정, 글로벌 경쟁력 인정.',
+              order: 1,
+              enabled: true
+            }
+          ]
+        },
+        {
+          id: 'period-5',
+          order: 5,
+          rangeLabel: '2017 ~ 2024',
+          yearStart: 2017,
+          yearEnd: 2024,
+          title: 'Innovation 혁신기',
+          subtitle: '4차 산업혁명 시대를 선도하다\nLeading the 4th Industrial Revolution',
+          heroMedia: 'https://images.unsplash.com/photo-1758432274762-71b4c4572728?w=1920',
+          enabled: true,
+          highlights: [
+            {
+              title: 'AI 융합 교육 플랫폼 구축',
+              year: '2023',
+              thumb: 'https://images.unsplash.com/photo-1758270705172-07b53627dfcb?w=800',
+              description: '인공지능과 헬스케어의 융합, 미래 교육 플랫폼 완성.',
+              order: 1,
+              enabled: true
+            }
+          ]
+        },
+        {
+          id: 'period-6',
+          order: 6,
+          rangeLabel: '2025 ~ Beyond',
+          yearStart: 2025,
+          yearEnd: 2100,
+          title: 'Future 미래기',
+          subtitle: '100주년을 향한 새로운 시작\nToward the Centennial',
+          heroMedia: 'https://images.unsplash.com/photo-1591218214141-45545921d2d9?w=1920',
+          enabled: true,
+          highlights: [
+            {
+              title: '개교 90주년 기념',
+              year: '2026',
+              thumb: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800',
+              description: '90년의 역사를 축하하고, 100주년을 향한 새로운 비전 선포.',
+              order: 1,
+              enabled: true
+            }
+          ]
         }
       ];
 
@@ -260,14 +323,24 @@ export default function SetupPage() {
         const periodRef = doc(db, 'homepage_periods', period.id);
         const { highlights, ...periodData } = period;
 
-        await setDoc(periodRef, periodData);
+        await setDoc(periodRef, {
+          ...periodData,
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now()
+        });
+        addLog(`  ✓ Period "${period.title}" 생성 완료`);
 
         // Highlights subcollection 생성
         for (const highlight of highlights) {
-          await addDoc(collection(periodRef, 'highlights'), highlight);
+          await addDoc(collection(periodRef, 'highlights'), {
+            ...highlight,
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now()
+          });
         }
+        addLog(`  ✓ Highlights ${highlights.length}개 추가 완료`);
       }
-      addLog('✅ Periods 데이터 완료 (3개 Period + Highlights)');
+      addLog('✅ Periods 데이터 완료 (6개 Period + Highlights)');
 
       // 8. Videos 데이터
       addLog('Videos 데이터 생성 중...');
@@ -323,7 +396,62 @@ export default function SetupPage() {
       await migrateInitialData(historyChapters);
       addLog('✅ History Chapters 데이터 완료 (6개 챕터)');
 
-      // 10. Statistics 데이터
+      // 10. 사연(Stories) 데이터
+      addLog('사연 데이터 생성 중...');
+      const storiesData = [
+        {
+          name: '김영희',
+          email: 'younghee@example.com',
+          graduationYear: 1985,
+          title: '평생 잊지 못할 첫 임상실습',
+          content: '1985년 간호학과 2학년 때, 처음으로 실제 환자를 돌보며 느꼈던 떨림과 감동을 아직도 잊을 수 없습니다. 선생님들의 따뜻한 지도와 격려 덕분에 지금까지 30년 넘게 간호사로 일할 수 있었습니다.',
+          isApproved: true,
+          createdAt: Timestamp.now(),
+        },
+        {
+          name: '이철수',
+          email: 'chulsoo@example.com',
+          graduationYear: 1998,
+          title: '삼육보건대가 내 인생을 바꿨습니다',
+          content: '물리치료과를 졸업하고 현재 재활병원 과장으로 일하고 있습니다. 학창시절 배운 전문지식과 봉사정신이 제 인생의 밑거름이 되었습니다. 후배들에게도 꼭 추천하고 싶은 학교입니다.',
+          isApproved: true,
+          createdAt: Timestamp.fromDate(new Date(Date.now() - 86400000)),
+        },
+        {
+          name: '박민수',
+          email: 'minsu@example.com',
+          graduationYear: 2010,
+          title: '90주년 축하합니다!',
+          content: '치위생과 졸업생입니다. 10년이 지난 지금도 학교에서 배운 것들이 큰 도움이 되고 있습니다. 90주년 진심으로 축하드리며, 100주년까지 건강하게 발전하시길 기원합니다!',
+          isApproved: true,
+          createdAt: Timestamp.fromDate(new Date(Date.now() - 172800000)),
+        },
+        {
+          name: '최은정',
+          email: 'eunjung@example.com',
+          graduationYear: 2015,
+          title: '감사합니다, 우리 학교',
+          content: '방사선과 졸업 후 대학병원에서 근무하고 있습니다. 재학 중 받았던 장학금과 교수님들의 진심 어린 가르침에 감사드립니다. 언제나 모교를 자랑스럽게 생각합니다.',
+          isApproved: false,
+          createdAt: Timestamp.fromDate(new Date(Date.now() - 259200000)),
+        },
+        {
+          name: '정민호',
+          email: 'minho@example.com',
+          graduationYear: 2020,
+          title: '코로나 시대, 학교의 지원에 감사',
+          content: '코로나19로 어려웠던 시기에도 온라인 수업을 적극 지원해주시고, 학생들을 배려해주신 학교에 감사드립니다. 졸업 후에도 모교가 자랑스럽습니다.',
+          isApproved: true,
+          createdAt: Timestamp.fromDate(new Date(Date.now() - 345600000)),
+        }
+      ];
+
+      for (const story of storiesData) {
+        await addDoc(collection(db, 'story_submissions'), story);
+      }
+      addLog('✅ 사연 데이터 완료 (5개)');
+
+      // 11. Statistics 데이터
       addLog('Statistics 데이터 생성 중...');
       await setDoc(doc(db, 'statistics_data', 'main'), {
         stats: [
@@ -508,7 +636,7 @@ export default function SetupPage() {
             </div>
             <div className="bg-black/30 rounded p-3">
               <div className="text-amber-500 font-bold mb-1">Periods</div>
-              <div className="text-gray-400 text-sm">3개 Period + Highlights</div>
+              <div className="text-gray-400 text-sm">6개 Period + Highlights</div>
             </div>
             <div className="bg-black/30 rounded p-3">
               <div className="text-amber-500 font-bold mb-1">Videos</div>
@@ -517,6 +645,10 @@ export default function SetupPage() {
             <div className="bg-black/30 rounded p-3">
               <div className="text-amber-500 font-bold mb-1">History Chapters</div>
               <div className="text-gray-400 text-sm">별빛 아카이브 6챕터</div>
+            </div>
+            <div className="bg-black/30 rounded p-3">
+              <div className="text-amber-500 font-bold mb-1">사연</div>
+              <div className="text-gray-400 text-sm">더미 사연 5개</div>
             </div>
             <div className="bg-black/30 rounded p-3">
               <div className="text-amber-500 font-bold mb-1">Statistics</div>
@@ -539,6 +671,7 @@ export default function SetupPage() {
             <div>• <a href="/admin/content/videos" className="text-blue-400 hover:underline">/admin/content/videos</a> - 동영상 관리</div>
             <div>• <a href="/admin/content/history" className="text-blue-400 hover:underline">/admin/content/history</a> - History Chapters 관리</div>
             <div>• <a href="/admin/content/statistics" className="text-blue-400 hover:underline">/admin/content/statistics</a> - 통계 관리</div>
+            <div>• <a href="/admin/content/stories" className="text-blue-400 hover:underline">/admin/content/stories</a> - 사연 관리</div>
             <div>• <a href="/" className="text-blue-400 hover:underline">메인 홈페이지</a> - 변경사항 확인</div>
           </div>
         </div>

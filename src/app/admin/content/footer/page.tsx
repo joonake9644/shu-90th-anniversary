@@ -68,6 +68,7 @@ export default function FooterManagementPage() {
       setLoading(true);
       const data = await getFooterContent();
 
+      // data가 null이어도 로딩 완료
       if (data) {
         setFormData({
           brandName: data.brandName,
@@ -80,6 +81,8 @@ export default function FooterManagementPage() {
           privacyPolicyUrl: data.privacyPolicyUrl,
           termsOfServiceUrl: data.termsOfServiceUrl,
         });
+      } else {
+        setMessage({ type: 'error', text: 'Footer 데이터가 없습니다. Setup 페이지에서 초기 데이터를 생성해주세요.' });
       }
     } catch (error) {
       console.error('Error loading footer content:', error);

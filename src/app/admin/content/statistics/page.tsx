@@ -41,12 +41,11 @@ export default function StatisticsManagementPage() {
     try {
       setLoading(true);
       const result = await getStatisticsData();
-      if (result) {
-        setData(result);
-      }
+      setData(result); // null이어도 설정하여 "데이터 없음" UI 표시
     } catch (error) {
       console.error('Failed to load statistics:', error);
       setMessage({ type: 'error', text: '통계 데이터를 불러오는데 실패했습니다.' });
+      setData(null);
     } finally {
       setLoading(false);
     }

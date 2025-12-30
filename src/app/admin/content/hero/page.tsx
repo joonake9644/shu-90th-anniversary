@@ -53,6 +53,7 @@ export default function HeroManagementPage() {
       setLoading(true);
       const data = await getHeroContent();
 
+      // data가 null이어도 로딩 완료 (Setup 페이지에서 생성 필요)
       if (data) {
         setFormData({
           backgroundImage: data.backgroundImage,
@@ -63,6 +64,8 @@ export default function HeroManagementPage() {
           universityName: data.universityName,
           description: data.description,
         });
+      } else {
+        setMessage({ type: 'error', text: 'Hero 데이터가 없습니다. Setup 페이지에서 초기 데이터를 생성해주세요.' });
       }
     } catch (error) {
       console.error('Error loading hero content:', error);
