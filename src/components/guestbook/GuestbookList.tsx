@@ -17,31 +17,26 @@ export function GuestbookList({ refreshTrigger }: GuestbookListProps) {
   const [yearFilter, setYearFilter] = useState<number | undefined>(undefined);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
 
-  const loadEntries = useCallback(async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getGuestbookEntries(sortBy, yearFilter, 50);
-      setEntries(data);
+      // 병렬 쿼리 실행으로 로딩 시간 단축
+      const [entriesData, yearsData] = await Promise.all([
+        getGuestbookEntries(sortBy, yearFilter, 20), // 50개 → 20개로 감소
+        getGraduationYears(),
+      ]);
+      setEntries(entriesData);
+      setAvailableYears(yearsData);
     } catch (error) {
-      console.error('방명록 로드 중 오류:', error);
+      console.error('데이터 로드 중 오류:', error);
     } finally {
       setLoading(false);
     }
   }, [sortBy, yearFilter]);
 
-  const loadYears = useCallback(async () => {
-    try {
-      const years = await getGraduationYears();
-      setAvailableYears(years);
-    } catch (error) {
-      console.error('졸업 연도 로드 중 오류:', error);
-    }
-  }, []);
-
   useEffect(() => {
-    loadEntries();
-    loadYears();
-  }, [loadEntries, loadYears, refreshTrigger]);
+    loadData();
+  }, [loadData, refreshTrigger]);
 
   return (
     <div>

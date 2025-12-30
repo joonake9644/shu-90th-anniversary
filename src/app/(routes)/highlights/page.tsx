@@ -171,7 +171,7 @@ function HighlightCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.5, delay: index * 0.05 }}
+      transition={{ duration: 0.3, delay: Math.min(index * 0.02, 0.3) }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="group relative bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-500"
@@ -182,6 +182,8 @@ function HighlightCard({
           src={highlight.thumb}
           alt={highlight.title}
           fill
+          loading="lazy"
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className={`object-cover transition-all duration-700 ${
             isHovered ? 'scale-110 grayscale-0' : 'scale-100 grayscale'
           }`}

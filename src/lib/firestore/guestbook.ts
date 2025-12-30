@@ -94,11 +94,27 @@ export async function likeGuestbookEntry(entryId: string): Promise<void> {
     });
 }
 
+// 졸업 연도 캐시 (5분 유효)
+let graduationYearsCache: { years: number[]; timestamp: number } | null = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5분
+
 /**
  * 졸업 연도 목록 가져오기 (필터용)
+ * 최적화: 캐싱 및 제한된 쿼리 사용
  */
 export async function getGraduationYears(): Promise<number[]> {
-    const snapshot = await getDocs(collection(db, COLLECTION_NAME));
+    // 캐시 확인
+    if (graduationYearsCache && Date.now() - graduationYearsCache.timestamp < CACHE_DURATION) {
+        return graduationYearsCache.years;
+    }
+
+    // 최근 1000개 항목만 조회 (전체 스캔 방지)
+    const q = query(
+        collection(db, COLLECTION_NAME),
+        orderBy('createdAt', 'desc'),
+        limit(1000)
+    );
+    const snapshot = await getDocs(q);
     const years = new Set<number>();
 
     snapshot.docs.forEach((doc) => {
@@ -108,5 +124,13 @@ export async function getGraduationYears(): Promise<number[]> {
         }
     });
 
-    return Array.from(years).sort((a, b) => b - a);
+    const sortedYears = Array.from(years).sort((a, b) => b - a);
+
+    // 캐시 업데이트
+    graduationYearsCache = {
+        years: sortedYears,
+        timestamp: Date.now(),
+    };
+
+    return sortedYears;
 }

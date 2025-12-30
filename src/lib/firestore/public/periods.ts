@@ -24,15 +24,25 @@ export interface PeriodWithHighlights extends Period {
   highlights: Highlight[];
 }
 
+// Periods 데이터 캐시 (5분 유효)
+let periodsCache: { data: PeriodWithHighlights[]; timestamp: number } | null = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5분
+
 /**
  * 모든 Period와 각각의 Highlights 조회 (공개용)
  *
  * enabled=true인 Period만 조회하고, 각 Period의 enabled=true인 Highlights도 포함
  * 오류 발생 시 null 반환 (Fallback 데이터 사용 권장)
+ * 최적화: 5분 캐싱 적용
  */
 export async function getPublicPeriodsWithHighlights(): Promise<
   PeriodWithHighlights[] | null
 > {
+  // 캐시 확인
+  if (periodsCache && Date.now() - periodsCache.timestamp < CACHE_DURATION) {
+    return periodsCache.data;
+  }
+
   try {
     // 1. 활성화된 Period 조회
     const periodsRef = collection(db, PERIODS_COLLECTION);
@@ -76,6 +86,12 @@ export async function getPublicPeriodsWithHighlights(): Promise<
         };
       })
     );
+
+    // 캐시 업데이트
+    periodsCache = {
+      data: periodsWithHighlights,
+      timestamp: Date.now(),
+    };
 
     return periodsWithHighlights;
   } catch (error) {
