@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase 연결 진단</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #1a1a1a;
+      color: #00ff00;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 { color: #ffcc00; }
+    h2 { color: #ff6600; border-bottom: 2px solid #333; padding-bottom: 10px; }
+    .success { color: #00ff00; }
+    .error { color: #ff0000; }
+    .warning { color: #ffcc00; }
+    .info { color: #00ccff; }
+    pre {
+      background: #000;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      border-left: 4px solid #00ff00;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #222;
+      border-radius: 8px;
+    }
+    button {
+      background: #00ff00;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px 5px;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+    button:hover { background: #00cc00; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Firebase 연결 진단 도구</h1>
+  <p class="warning">⚠️ 이 페이지는 현재 Firebase 설정의 실제 상태를 검증합니다.</p>
+
+  <div class="test-section">
+    <h2>1️⃣ 환경 변수 검증</h2>
+    <button onclick="checkEnvVars()">환경 변수 확인</button>
+    <pre id="env-result">클릭하여 확인...</pre>
+  </div>
+
+  <div class="test-section">
+    <h2>2️⃣ Firebase 초기화 상태</h2>
+    <button onclick="checkFirebaseInit()">Firebase 설정 확인</button>
+    <pre id="firebase-result">클릭하여 확인...</pre>
+  </div>
+
+  <div class="test-section">
+    <h2>3️⃣ Firestore 연결 테스트</h2>
+    <button onclick="testFirestoreRead()">Events 데이터 읽기</button>
+    <button onclick="testFirestoreWrite()">테스트 쓰기</button>
+    <pre id="firestore-result">클릭하여 확인...</pre>
+  </div>
+
+  <div class="test-section">
+    <h2>4️⃣ Storage 연결 테스트</h2>
+    <button onclick="testStorage()">Storage 확인</button>
+    <pre id="storage-result">클릭하여 확인...</pre>
+  </div>
+
+  <div class="test-section">
+    <h2>5️⃣ 네트워크 요청 분석</h2>
+    <p class="info">브라우저 개발자 도구의 Network 탭을 열고 위 테스트를 실행하세요.</p>
+    <p class="info">firestore.googleapis.com으로 가는 요청의 URL과 Response를 확인하세요.</p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { getStorage, ref, listAll } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+
+    // 환경 변수 읽기 (Next.js 빌드에서 주입됨)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFL2UzS-p_NAt3iGpI2V__S8g-B_72kZs",
+      authDomain: "shu-90th-anniversary.firebaseapp.com",
+      projectId: "shu-90th-anniversary",
+      storageBucket: "shu-90th-anniversary.firebasestorage.app",
+      messagingSenderId: "875713156990",
+      appId: "1:875713156990:web:b8ad8badb7e2dbebedc52f",
+      measurementId: "G-YTHEF7JMZB"
+    };
+
+    let app, db, storage;
+
+    try {
+      app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      storage = getStorage(app);
+      console.log('✅ Firebase initialized successfully');
+    } catch (error) {
+      console.error('❌ Firebase initialization failed:', error);
+    }
+
+    window.checkEnvVars = function() {
+      const result = document.getElementById('env-result');
+      result.innerHTML = `
+<span class="info">═══════ Firebase Config (하드코딩됨) ═══════</span>
+API Key: ${firebaseConfig.apiKey}
+Auth Domain: ${firebaseConfig.authDomain}
+Project ID: <span class="success">${firebaseConfig.projectId}</span>
+Storage Bucket: <span class="success">${firebaseConfig.storageBucket}</span>
+Messaging Sender ID: ${firebaseConfig.messagingSenderId}
+App ID: ${firebaseConfig.appId}
+
+<span class="warning">⚠️ 중요: 이 설정이 Firebase Console과 정확히 일치하는지 확인하세요!</span>
+<span class="info">Firebase Console: https://console.firebase.google.com/project/${firebaseConfig.projectId}</span>
+      `.trim();
+    };
+
+    window.checkFirebaseInit = function() {
+      const result = document.getElementById('firebase-result');
+
+      if (!app) {
+        result.innerHTML = '<span class="error">❌ Firebase 앱이 초기화되지 않았습니다!</span>';
+        return;
+      }
+
+      result.innerHTML = `
+<span class="success">✅ Firebase App 초기화 완료</span>
+
+App Name: ${app.name}
+Options:
+${JSON.stringify(app.options, null, 2)}
+
+<span class="info">Firestore Instance:</span> ${db ? '✅ Connected' : '❌ Not initialized'}
+<span class="info">Storage Instance:</span> ${storage ? '✅ Connected' : '❌ Not initialized'}
+
+<span class="warning">⚠️ Emulator 체크:</span>
+- Firestore Emulator: ${db && db._settings?.host?.includes('localhost') ? '🔴 사용 중 (로컬)' : '✅ 사용 안 함 (프로덕션)'}
+- Storage Emulator: ${storage && storage._url?.includes('localhost') ? '🔴 사용 중 (로컬)' : '✅ 사용 안 함 (프로덕션)'}
+      `.trim();
+    };
+
+    window.testFirestoreRead = async function() {
+      const result = document.getElementById('firestore-result');
+      result.innerHTML = '<span class="info">🔄 Events 컬렉션 읽는 중...</span>';
+
+      try {
+        const startTime = performance.now();
+        const eventsRef = collection(db, 'events');
+        const snapshot = await getDocs(eventsRef);
+        const endTime = performance.now();
+
+        const events = [];
+        snapshot.forEach(doc => {
+          events.push({
+            id: doc.id,
+            title: doc.data().title,
+            category: doc.data().category,
+            location: doc.data().location
+          });
+        });
+
+        result.innerHTML = `
+<span class="success">✅ Firestore 읽기 성공!</span>
+
+응답 시간: ${(endTime - startTime).toFixed(2)}ms
+문서 개수: <span class="success">${snapshot.size}개</span>
+
+샘플 데이터 (처음 3개):
+${JSON.stringify(events.slice(0, 3), null, 2)}
+
+<span class="info">📍 실제 엔드포인트:</span>
+https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/events
+
+<span class="warning">⚠️ Network 탭에서 위 URL로 요청이 갔는지 확인하세요!</span>
+        `.trim();
+      } catch (error) {
+        result.innerHTML = `
+<span class="error">❌ Firestore 읽기 실패!</span>
+
+에러 타입: ${error.name}
+에러 메시지: ${error.message}
+에러 코드: ${error.code || 'N/A'}
+
+<span class="warning">가능한 원인:</span>
+1. 보안 규칙이 읽기를 차단하고 있음
+2. 컬렉션이 존재하지 않음
+3. 네트워크 연결 문제
+4. Firebase 프로젝트 ID가 잘못됨
+
+<span class="info">전체 에러 객체:</span>
+${JSON.stringify(error, null, 2)}
+        `.trim();
+      }
+    };
+
+    window.testFirestoreWrite = async function() {
+      const result = document.getElementById('firestore-result');
+      result.innerHTML = '<span class="info">🔄 테스트 데이터 쓰는 중...</span>';
+
+      try {
+        const testDoc = {
+          type: 'diagnostic_test',
+          timestamp: serverTimestamp(),
+          message: '진단 테스트',
+          browser: navigator.userAgent,
+          url: window.location.href
+        };
+
+        const docRef = await addDoc(collection(db, 'test-collection'), testDoc);
+
+        result.innerHTML = `
+<span class="success">✅ Firestore 쓰기 성공!</span>
+
+생성된 문서 ID: <span class="success">${docRef.id}</span>
+컬렉션 경로: test-collection
+
+<span class="info">Firebase Console에서 확인:</span>
+https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore/data/test-collection/${docRef.id}
+
+<span class="warning">⚠️ 위 링크를 클릭해서 실제로 Firebase Console에 데이터가 보이는지 확인하세요!</span>
+        `.trim();
+      } catch (error) {
+        result.innerHTML = `
+<span class="error">❌ Firestore 쓰기 실패!</span>
+
+에러 코드: <span class="error">${error.code || 'N/A'}</span>
+에러 메시지: ${error.message}
+
+<span class="warning">가능한 원인:</span>
+1. <span class="error">보안 규칙이 쓰기를 차단</span> (가장 가능성 높음)
+2. 인증되지 않은 사용자
+3. 권한 부족
+4. 네트워크 문제
+
+전체 에러:
+${JSON.stringify(error, null, 2)}
+        `.trim();
+      }
+    };
+
+    window.testStorage = async function() {
+      const result = document.getElementById('storage-result');
+      result.innerHTML = '<span class="info">🔄 Storage 확인 중...</span>';
+
+      try {
+        const storageRef = ref(storage, '/');
+        const listResult = await listAll(storageRef);
+
+        result.innerHTML = `
+<span class="success">✅ Storage 연결 성공!</span>
+
+Storage Bucket: <span class="success">${firebaseConfig.storageBucket}</span>
+루트 폴더 개수: ${listResult.prefixes.length}
+루트 파일 개수: ${listResult.items.length}
+
+폴더 목록:
+${listResult.prefixes.map(p => `  - ${p.fullPath}`).join('\n') || '  (폴더 없음)'}
+
+<span class="info">Firebase Storage Console:</span>
+https://console.firebase.google.com/project/${firebaseConfig.projectId}/storage
+
+<span class="warning">⚠️ 위 Console에서 실제 버킷과 일치하는지 확인하세요!</span>
+        `.trim();
+      } catch (error) {
+        result.innerHTML = `
+<span class="error">❌ Storage 접근 실패!</span>
+
+에러 코드: ${error.code || 'N/A'}
+에러 메시지: ${error.message}
+
+<span class="warning">가능한 원인:</span>
+1. Storage 보안 규칙이 읽기를 차단
+2. Storage Bucket이 잘못 설정됨
+3. 권한 부족
+
+전체 에러:
+${JSON.stringify(error, null, 2)}
+        `.trim();
+      }
+    };
+
+    // 페이지 로드 시 자동 실행
+    window.addEventListener('load', () => {
+      console.log('%c🔍 Firebase 진단 도구 로드됨', 'color: #00ff00; font-size: 20px; font-weight: bold;');
+      console.log('페이지의 버튼을 클릭하여 진단을 시작하세요.');
+      console.log('또는 콘솔에서 다음 함수를 직접 호출할 수 있습니다:');
+      console.log('  - checkEnvVars()');
+      console.log('  - checkFirebaseInit()');
+      console.log('  - testFirestoreRead()');
+      console.log('  - testFirestoreWrite()');
+      console.log('  - testStorage()');
+    });
+  </script>
+</body>
+</html>
