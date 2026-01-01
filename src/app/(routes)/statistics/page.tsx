@@ -222,9 +222,9 @@ function BigStatCard({
     >
       <div className="bg-white/5 rounded-2xl p-6 md:p-8 border border-white/10 hover:border-amber-500/50 transition-all duration-500 h-full flex flex-col justify-between">
         {/* 숫자 크기 조정: 박스에 맞게 반응형 크기 설정 */}
-        <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-amber-500 mb-3 font-mono leading-none break-all">
+        <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-amber-500 mb-3 font-mono leading-none whitespace-nowrap">
           <span className="inline-block">{displayValue.toLocaleString()}</span>
-          <span className="text-2xl sm:text-3xl md:text-4xl align-top">{suffix}</span>
+          <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl align-top">{suffix}</span>
         </div>
         <div>
           <div className="text-xs sm:text-sm text-gray-400 uppercase tracking-widest mb-2">

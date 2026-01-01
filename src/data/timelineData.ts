@@ -72,7 +72,7 @@ export const timelineData: Period[] = [
         id: "h2_2",
         title: "전란 속의 교육 지속",
         year: "1951",
-        thumb: "https://images.unsplash.com/photo-1533481498108-4b77f433501a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvbGQlMjBrb3JlYSUyMHdhciUyMHJ1aW5zfGVufDF8fHx8MTc2NTg5MDc4MHww&ixlib=rb-4.1.0&q=80&w=1080",
+        thumb: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?q=80&w=1080&auto=format&fit=crop",
         description: "임시 교사에서도 멈추지 않은 학구열.\nUnceasing passion for learning even in temporary shelters."
       }
     ]

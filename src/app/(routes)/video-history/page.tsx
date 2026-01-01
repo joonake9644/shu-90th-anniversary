@@ -29,7 +29,7 @@ const fallbackVideosData: Video[] = [
     description: '어려운 상황에서도 멈추지 않은 교육의 열정',
     year: '1951',
     duration: '8:15',
-    thumbnail: 'https://images.unsplash.com/photo-1533481498108-4b77f433501a?w=800',
+    thumbnail: 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=800',
     videoUrl: 'https://www.youtube.com/watch?v=example2',
     category: '역사',
     period: '1947-1956',

@@ -138,7 +138,7 @@ export default function SetupPage() {
           title: '2025학년도 입학식 개최...신입생 800명 입학',
           summary: '2025학년도 신입생 800명이 삼육보건대학교의 새로운 가족이 되었습니다.',
           content: '삼육보건대학교는 3월 2일 교내 대강당에서 2025학년도 입학식을 개최했다. 이날 입학식에는 신입생 800명과 학부모, 교직원 등 약 2,000명이 참석했다.',
-          thumbnail: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800',
+          thumbnail: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800',
           author: '학생처',
           category: 'event',
           publishedAt: Timestamp.fromDate(new Date('2025-03-02')),

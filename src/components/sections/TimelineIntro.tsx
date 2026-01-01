@@ -356,9 +356,9 @@ export function TimelineIntro() {
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-60" />
                             <div className="absolute bottom-2 left-2 right-2 text-left">
-                                <span className="block text-xs text-white/50 font-light tracking-widest uppercase mb-0.5">Future Vision</span>
-                                <h4 className="text-sm md:text-lg font-bold text-white tracking-wider">미래비전</h4>
-                                <span className="block text-[10px] text-white/70 font-mono mt-1">2025-2036</span>
+                                <span className="block text-[10px] md:text-xs text-white/50 font-light tracking-wide uppercase mb-0.5">Future Vision</span>
+                                <h4 className="text-xs md:text-lg font-bold text-white tracking-wide">미래비전</h4>
+                                <span className="block text-[9px] md:text-[10px] text-white/70 font-mono mt-0.5">2025-2036</span>
                             </div>
                         </div>
                     </motion.div>

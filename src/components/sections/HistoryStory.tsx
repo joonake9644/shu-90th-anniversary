@@ -22,7 +22,7 @@ const fallbackActs: HistoryStoryAct[] = [
         id: 'act1',
         actType: 'act1',
         order: 1,
-        actImageUrl: 'https://images.unsplash.com/photo-1516570161687-0b1a7742d87a?q=80&w=1200&auto=format&fit=crop',
+        actImageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1200&auto=format&fit=crop',
         actTitleEn: 'ACT 1: HARDSHIP',
         actTitleKr: '고난, 그 깊은 뿌리',
         actDescription: '전쟁과 폐허 속에서도 꺼지지 않았던 등불.\n류제한 박사의 천막 병원은 절망을 희망으로 바꾸는\n거룩한 성소였습니다.',
@@ -102,48 +102,48 @@ export default function HistoryStory() {
         offset: ["start start", "end end"]
     });
 
-    // --- STAGE 1: FAST ENTRY (0% - 20%) ---
+    // --- STAGE 1: 더 빨리 시작, 천천히 진행 (0% - 52%) ---
     // "90 Year History First Sentence" -> Spark Appearance
-    // Narrative 1: "Darkness" - Rapid appearance at the very start
-    const text1Opacity = useTransform(scrollYProgress, [0.02, 0.05, 0.08, 0.10], [0, 1, 1, 0]);
-    const text1Y = useTransform(scrollYProgress, [0.02, 0.10], ["20px", "-10px"]);
+    // Narrative 1: "Darkness" - 스크롤 1/2 지점에서 빠르게 나타남
+    const text1Opacity = useTransform(scrollYProgress, [0.01, 0.04, 0.12, 0.16], [0, 1, 1, 0]);
+    const text1Y = useTransform(scrollYProgress, [0.01, 0.16], ["20px", "-10px"]);
 
-    // Spark: Appears in the 10-20% range (Fast)
-    const sparkScale = useTransform(scrollYProgress, [0.10, 0.15, 0.20], [0.5, 1, 30]);
-    const sparkOpacity = useTransform(scrollYProgress, [0.10, 0.15, 0.20], [0, 1, 0]);
-    const sparkGlow = useTransform(scrollYProgress, [0.10, 0.20], ["0px", "40px"]);
+    // Spark: 천천히 확대되며 나타남
+    const sparkScale = useTransform(scrollYProgress, [0.16, 0.24, 0.32], [0.5, 1, 30]);
+    const sparkOpacity = useTransform(scrollYProgress, [0.16, 0.24, 0.32], [0, 1, 0]);
+    const sparkGlow = useTransform(scrollYProgress, [0.16, 0.32], ["0px", "40px"]);
 
-    // --- STAGE 2: SLOW APPRECIATION (20% - 100%) ---
+    // --- STAGE 2: 충분한 시간 부여 (32% - 100%) ---
     // Spark -> "In Memory" -> History Years -> Acts
 
-    // Narrative 2: "Hope" - Bridge to 1936
-    const text2Opacity = useTransform(scrollYProgress, [0.15, 0.18, 0.22, 0.25], [0, 1, 1, 0]);
-    const text2Y = useTransform(scrollYProgress, [0.15, 0.25], ["20px", "-10px"]);
+    // Narrative 2: "Hope" - 1936으로 가는 다리
+    const text2Opacity = useTransform(scrollYProgress, [0.20, 0.24, 0.32, 0.36], [0, 1, 1, 0]);
+    const text2Y = useTransform(scrollYProgress, [0.20, 0.36], ["20px", "-10px"]);
 
-    // Main Title: 1936 - The Anchor
-    const text1936Scale = useTransform(scrollYProgress, [0.20, 0.30], [0.8, 1.2]);
-    const text1936Opacity = useTransform(scrollYProgress, [0.20, 0.25, 0.30, 0.35], [0, 1, 1, 0]);
+    // Main Title: 1936 - 충분히 감상할 시간
+    const text1936Scale = useTransform(scrollYProgress, [0.36, 0.48], [0.8, 1.2]);
+    const text1936Opacity = useTransform(scrollYProgress, [0.36, 0.42, 0.48, 0.52], [0, 1, 1, 0]);
 
-    // Prologue Fade Out
-    const prologueOpacity = useTransform(scrollYProgress, [0, 0.30, 0.35], [1, 1, 0]);
+    // Prologue Fade Out - 더 긴 유지 시간
+    const prologueOpacity = useTransform(scrollYProgress, [0, 0.48, 0.55], [1, 1, 0]);
 
-    // ACT 1: HARDSHIP (35% - 50%)
-    const act1Opacity = useTransform(scrollYProgress, [0.35, 0.40, 0.48, 0.50], [0, 1, 1, 0]);
-    const act1X = useTransform(scrollYProgress, [0.35, 0.50], ["5%", "-5%"]);
+    // ACT 1: HARDSHIP (55% - 67%)
+    const act1Opacity = useTransform(scrollYProgress, [0.55, 0.60, 0.65, 0.67], [0, 1, 1, 0]);
+    const act1X = useTransform(scrollYProgress, [0.55, 0.67], ["5%", "-5%"]);
 
-    // ACT 2: FOREST OF TRUTH (50% - 70%)
-    const act2Opacity = useTransform(scrollYProgress, [0.50, 0.55, 0.65, 0.70], [0, 1, 1, 0]);
-    const treePathLength = useTransform(scrollYProgress, [0.52, 0.68], [0, 1]);
+    // ACT 2: FOREST OF TRUTH (67% - 80%)
+    const act2Opacity = useTransform(scrollYProgress, [0.67, 0.70, 0.78, 0.80], [0, 1, 1, 0]);
+    const treePathLength = useTransform(scrollYProgress, [0.68, 0.79], [0, 1]);
 
-    // ACT 3: PRISM OF LOVE (70% - 85%)
-    const act3Opacity = useTransform(scrollYProgress, [0.70, 0.75, 0.82, 0.85], [0, 1, 1, 0]);
-    const prismRotate = useTransform(scrollYProgress, [0.70, 0.85], [0, 180]);
-    const prismScale = useTransform(scrollYProgress, [0.70, 0.80], [0.5, 1.2]);
+    // ACT 3: PRISM OF LOVE (80% - 90%)
+    const act3Opacity = useTransform(scrollYProgress, [0.80, 0.83, 0.88, 0.90], [0, 1, 1, 0]);
+    const prismRotate = useTransform(scrollYProgress, [0.80, 0.90], [0, 180]);
+    const prismScale = useTransform(scrollYProgress, [0.80, 0.87], [0.5, 1.2]);
 
-    // EPILOGUE: PROMISE (85% - 100%)
-    const epilogueOpacity = useTransform(scrollYProgress, [0.85, 0.90], [0, 1]);
-    const circleScale = useTransform(scrollYProgress, [0.88, 1], [0.1, 4]);
-    const starOpacity = useTransform(scrollYProgress, [0.85, 0.95], [0, 1]);
+    // EPILOGUE: PROMISE (90% - 100%)
+    const epilogueOpacity = useTransform(scrollYProgress, [0.90, 0.93], [0, 1]);
+    const circleScale = useTransform(scrollYProgress, [0.92, 1], [0.1, 4]);
+    const starOpacity = useTransform(scrollYProgress, [0.90, 0.97], [0, 1]);
 
     // State for random values to avoid hydration mismatch
     const [worldPoints, setWorldPoints] = React.useState<{ top: string, left: string, delay: number }[]>([]);
@@ -230,7 +230,7 @@ export default function HistoryStory() {
                             <motion.div style={{ x: act1X }} className="relative">
                                 <div className="relative aspect-[4/5] bg-gray-800 overflow-hidden grayscale contrast-125 rounded-sm border border-white/10 shadow-2xl">
                                     <Image
-                                        src={act1?.actImageUrl || 'https://images.unsplash.com/photo-1516570161687-0b1a7742d87a?q=80&w=1200&auto=format&fit=crop'}
+                                        src={act1?.actImageUrl || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1200&auto=format&fit=crop'}
                                         alt="Hardship"
                                         fill
                                         className="object-cover opacity-60"
